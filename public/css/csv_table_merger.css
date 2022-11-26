@@ -1,0 +1,30 @@
+.cctm-app .cctm-app-inner h2 {
+  margin-bottom: 2rem;
+}
+.cctm-app .cctm-app-inner p {
+  margin-bottom: 2rem;
+}
+.cctm-app .cctm-app-inner .cctm-h2-error {
+  color: red;
+}
+.cctm-app .cctm-app-inner .cctm-h2-success {
+  color: green;
+}
+.cctm-app .cctm-app-inner .cctm-summary-box {
+  background-color: #0a0a0a;
+  padding: 1rem;
+  display: block;
+}
+.cctm-app .cctm-app-inner .cctm-summary-box p {
+  line-height: 1.8;
+  margin-bottom: 0.4rem;
+  font-size: 11px;
+}
+.cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-error {
+  color: #f88585;
+}
+.cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-info {
+  color: greenyellow;
+}
+
+/*# sourceMappingURL=csv_table_merger.css.map */

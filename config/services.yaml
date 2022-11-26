@@ -1,0 +1,26 @@
+# config/services.yaml
+services:
+    _defaults:
+        autowire: true          # Automatically injects dependencies in your services.
+        autoconfigure: true     # Automatically registers your services as commands, event subscribers, etc.
+        public: false           # Allows optimizing the container by removing unused services; this also means
+                                # fetching services directly from the container via $container->get() won't work.
+                                # The best practice is to be explicit about your dependencies anyway.
+        bind:
+            $projectDir: '%kernel.project_dir%'
+            $appConfig: '%markocupic_contao_csv_table_merger%'
+            $passwordHasherFactory: '@security.password_hasher_factory'
+
+    Markocupic\ContaoCsvTableMerger\:
+        resource: ../src/
+        exclude: ../src/{DataRecord,DependencyInjection,Model}
+
+    # Add a session bag
+    Markocupic\ContaoCsvTableMerger\Session\Attribute\ArrayAttributeBag:
+        arguments:
+            - _markocupic_contao_csv_table_merger_attributes
+        calls:
+            - [ setName, [ markocupic_contao_csv_table_merger ] ]
+
+    Markocupic\ContaoCsvTableMerger\Controller\Backend\CsvTableMergeController:
+        public: true
