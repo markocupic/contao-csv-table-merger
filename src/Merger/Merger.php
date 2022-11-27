@@ -28,11 +28,13 @@ use League\Csv\Statement;
 use Markocupic\ContaoCsvTableMerger\DataRecord\DataRecord;
 use Markocupic\ContaoCsvTableMerger\Message\Message;
 use Markocupic\ContaoCsvTableMerger\Model\CsvTableMergerModel;
+use Markocupic\ContaoCsvTableMerger\Validator\WidgetValidator;
 
 class Merger
 {
     private ContaoFramework $framework;
     private Connection $connection;
+    private WidgetValidator $widgetValidator;
     private Message $message;
     private array $appConfig;
     private string $projectDir;
@@ -50,10 +52,11 @@ class Merger
     private string $enclosure = '"';
     private ?string $source = null;
 
-    public function __construct(ContaoFramework $framework, Connection $connection, Message $message, array $appConfig, string $projectDir)
+    public function __construct(ContaoFramework $framework, Connection $connection, WidgetValidator $widgetValidator, Message $message, array $appConfig, string $projectDir)
     {
         $this->framework = $framework;
         $this->connection = $connection;
+        $this->widgetValidator = $widgetValidator;
         $this->message = $message;
         $this->appConfig = $appConfig;
         $this->projectDir = $projectDir;
@@ -180,15 +183,34 @@ class Merger
      */
     private function insertRecord(DataRecord $objDataRecord): void
     {
+        $arrRecord = $objDataRecord->getData();
+
+        // Do only allow inserting selected fields.
+        foreach (array_keys($arrRecord) as $fieldName) {
+            if (!\in_array($fieldName, $this->allowedFields, true)) {
+                unset($arrRecord[$fieldName]);
+            }
+        }
+
+        $objDataRecord->setData($arrRecord);
+
         /** @var DataRecord $objDataRecord */
         $objDataRecord = $this->triggerBeforeInsertHook($objDataRecord);
+
         $arrRecord = $objDataRecord->getData();
+
+        foreach ($arrRecord as $fieldName => $varValue) {
+            $arrRecord[$fieldName] = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'insert');
+        }
+
+        $objDataRecord->setData($arrRecord);
 
         if ($objDataRecord->getStoreData()) {
             $affected = (bool) $this->connection->insert($this->importTable, $arrRecord);
 
             if ($affected) {
                 $insertId = (int) $this->connection->lastInsertId();
+
                 $this->triggerPostInsertHook($this->importTable, $insertId);
 
                 $this->message->addInfo(
@@ -220,39 +242,49 @@ class Merger
      */
     private function updateRecord(DataRecord $objDataRecord): void
     {
-        $objDataRecord = $this->triggerBeforeUpdateHook($objDataRecord);
+        $arrRecord = $objDataRecord->getData();
 
         // Do not update id, passwords, etc.
         $arrFieldsNewerUpdate = $this->appConfig['fields_newer_update'];
 
+        // Do not allow updating/inserting not allowed fields.
+        // E.g. 'id', 'password', 'dateAdded', 'addedOn'
+        // See Configuration.php
+        foreach ($arrFieldsNewerUpdate as $fieldNewerUpdate) {
+            if (isset($arrRecord[$fieldNewerUpdate])) {
+                unset($arrRecord[$fieldNewerUpdate]);
+            }
+        }
+
+        // Do only allow updating selected fields.
+        foreach (array_keys($arrRecord) as $fieldName) {
+            if (!\in_array($fieldName, $this->allowedFields, true)) {
+                unset($arrRecord[$fieldName]);
+            }
+        }
+
+        $objDataRecord->setData($arrRecord);
+
+        $objDataRecord = $this->triggerBeforeUpdateHook($objDataRecord);
+
         if ($objDataRecord->getStoreData()) {
             // New state
-            $arrNew = $objDataRecord->getData();
+            $arrRecord = $objDataRecord->getData();
 
             // Current state
             $arrCurrent = $objDataRecord->getTargetRecord();
 
-            // Do not allow updating/inserting not allowed fields.
-            // E.g. 'id', 'password', 'dateAdded', 'addedOn'
-            // See Configuration.php
-            foreach ($arrFieldsNewerUpdate as $fieldNewerUpdate) {
-                if (isset($arrNew[$fieldNewerUpdate])) {
-                    unset($arrNew[$fieldNewerUpdate]);
-                }
+            foreach ($arrRecord as $fieldName => $varValue) {
+                $arrRecord[$fieldName] = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'update');
             }
 
-            // Do only allow updating selected fields.
-            foreach (array_keys($arrNew) as $fieldName) {
-                if (!\in_array($fieldName, $this->allowedFields, true)) {
-                    unset($arrNew[$fieldName]);
-                }
-            }
+            $objDataRecord->setData($arrRecord);
 
-            $affected = (bool) $this->connection->update($this->importTable, $arrNew, ['id' => $arrCurrent['id']]);
+            $affected = (bool) $this->connection->update($this->importTable, $arrRecord, ['id' => $arrCurrent['id']]);
 
             if ($affected) {
                 // Auto-update tstamp, if it wasn't explicitly declared.
-                if (!isset($arrNew['tstamp']) || empty($arrNew['tstamp'])) {
+                if (empty($arrRecord['tstamp'])) {
                     if (Database::getInstance()->fieldExists('tstamp', $this->importTable)) {
                         $this->connection->update($this->importTable, ['tstamp' => time()], ['id' => $arrCurrent['id']]);
                     }
@@ -397,7 +429,16 @@ class Merger
     {
         $arrRecords = $this->getRecordsFromCsv();
 
-        // Check #1: Check, if identifier exists.
+        // Check #0: Check, if has been defined.
+        if (!\strlen($this->identifier)) {
+            $this->message->addError(
+                'Table merge process aborted! You have to define an identifier.'
+            );
+
+            return false;
+        }
+
+        // Check #1: Check, if each record contains an identifier.
         $hasError = false;
         $line = 1; // headline: line #1
 

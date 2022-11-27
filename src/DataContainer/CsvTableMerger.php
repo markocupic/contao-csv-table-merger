@@ -49,11 +49,13 @@ class CsvTableMerger
     /**
      * @Callback(table="tl_csv_table_merger", target="fields.allowedFields.options")
      * @Callback(table="tl_csv_table_merger", target="fields.identifier.options")
+     * @Callback(table="tl_csv_table_merger", target="fields.skipValidationFields.options")
      *
      * @throws Exception
      */
     //#[AsCallback(table: 'tl_csv_table_merger', target: 'fields.allowedFields.options', priority: 100)]
     //#[AsCallback(table: 'tl_csv_table_merger', target: 'fields.identifier.options', priority: 100)]
+    //#[AsCallback(table: 'tl_csv_table_merger', target: 'fields.skipValidationFields.options', priority: 100)]
     public function optionsCallbackGetTableColumns(DataContainer $dc): array
     {
         $controllerAdapter = $this->framework->getAdapter(Controller::class);

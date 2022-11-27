@@ -61,8 +61,8 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
                 'icon' => 'show.gif',
             ],
             'merge'  => [
-                'href' => 'key=runMergingProcessAction',
-                'icon' => 'bundles/markocupiccontaocsvtablemerger/icons/merge_16.svg',
+                'href'       => 'key=runMergingProcessAction',
+                'icon'       => 'bundles/markocupiccontaocsvtablemerger/icons/merge_16.svg',
                 'attributes' => 'onclick="if (!confirm(\''.($GLOBALS['TL_LANG']['CCTM_MSC']['mergeConfirm'] ?? null).'\')) return false; Backend.getScrollOffset();"',
             ],
         ],
@@ -70,7 +70,7 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
     'palettes'    => [
         'default'      => '
             {title_legend},title;
-            {settings_legend},importTable,identifier,allowedFields,delimiter,enclosure,fileSRC,deleteNonExistentRecords
+            {settings_legend},importTable,identifier,allowedFields,delimiter,enclosure,arrayDelimiter,skipValidationFields,fileSRC,deleteNonExistentRecords
         ',
         '__selector__' => [],
     ],
@@ -102,6 +102,12 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
             'eval'      => ['multiple' => false, 'mandatory' => true, 'includeBlankOption' => true, 'submitOnChange' => true],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
+        'allowedFields'            => [
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => ['multiple' => true, 'mandatory' => true],
+            'sql'       => 'blob NULL',
+        ],
         'identifier'               => [
             'exclude'   => true,
             'inputType' => 'select',
@@ -113,18 +119,24 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
             'inputType' => 'text',
             'default'   => ';',
             'eval'      => ['mandatory' => true, 'maxlength' => 1],
-            'sql'       => "varchar(255) NOT NULL default ';'",
+            'sql'       => "varchar(4) NOT NULL default ';'",
         ],
-        'enclosure'           => [
+        'enclosure'                => [
             'exclude'   => true,
             'inputType' => 'text',
-            'eval'      => ['mandatory' => false, 'useRawRequestData' => true, 'maxlength' => 1],
-            'sql'       => "varchar(255) NOT NULL default '\"'",
+            'eval'      => ['mandatory' => true, 'useRawRequestData' => true, 'maxlength' => 1],
+            'sql'       => "varchar(4) NOT NULL default '\"'",
         ],
-        'allowedFields'            => [
+        'arrayDelimiter'           => [
             'exclude'   => true,
-            'inputType' => 'checkbox',
-            'eval'      => ['multiple' => true, 'mandatory' => true],
+            'inputType' => 'text',
+            'default'   => '||',
+            'eval'      => ['mandatory' => true, 'useRawRequestData' => true, 'maxlength' => 2],
+            'sql'       => "varchar(4) NOT NULL default '||'",
+        ],
+        'skipValidationFields'     => [
+            'inputType' => 'select',
+            'eval'      => ['multiple' => true, 'chosen' => true, 'mandatory' => false],
             'sql'       => 'blob NULL',
         ],
         'fileSRC'                  => [
