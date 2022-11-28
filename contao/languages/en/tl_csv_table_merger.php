@@ -15,34 +15,29 @@ declare(strict_types=1);
 /**
  * Legends
  */
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['first_legend'] = "Basis Einstellungen";
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['second_legend'] = "Erweiterte Einstellungen";
-
-/**
-* Global operations
-*/
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['new'] = ["Neu", "Ein neues Element anlegen"];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['title_legend'] = "Title";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['settings_legend'] = "Settings";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['text_file_legend'] = "CSV text file settings";
 
 /**
  * Operations
  */
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['edit'] = "Datensatz mit ID: %s bearbeiten";
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['copy'] = "Datensatz mit ID: %s kopieren";
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['delete'] = "Datensatz mit ID: %s löschen";
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['show'] = "Datensatz mit ID: %s ansehen";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['edit'] = "Edit record with ID: %s";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['copy'] = "Copy record with ID: %s";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['delete'] = "Delete record with ID: %s";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['show'] = "Show record with ID: %s";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['merge'] = "Start merging process with ID: %s";
 
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['title'] = ["Titel", "Geben Sie den Titel ein"];
-
-/**
- * References
- */
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['firstoption'] = "Erste Option";
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['secondoption'] = "Zweite Option";
-
-/**
- * Buttons
- */
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['customButton'] = "Custom Routine starten";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['title'] = ["Title", "Please enter the title."];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['importTable'] = ["Target table", "Please select the target table."];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['identifier'] = ["Identifier field", "Please select the identifier field."];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['allowedFields'] = ["Allowed fields", "Please select the fields that may be overwritten."];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['delimiter'] = ["Delimiter", "Please enter the field delimiter. Normally ;"];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['enclosure'] = ["Enclosure", "Please enter the field enclosure. Normally \""];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['arrayDelimiter'] = ["Array delimiter", "Please enter the array delimiter. Normally ||"];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['skipValidationFields'] = ["Skip input validation for these fields", "Please select the fields whose value should not be validated."];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['fileSRC'] = ["CSV text file", "Please select the CSV text file."];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['deleteNonExistentRecords'] = ["Delete non existent records", "Delete records in the target table that no longer exist in the text file."];

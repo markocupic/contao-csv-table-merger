@@ -15,4 +15,4 @@ declare(strict_types=1);
 /**
  * Backend modules
  */
-$GLOBALS['TL_LANG']['MOD']['csv_table_merger'] = ['CSV Table Merger', 'Merge Contao tables from a CSV spreadsheet.'];
+$GLOBALS['TL_LANG']['MOD']['csv_table_merger'] = ['CSV Table Merger', 'Merge Contao Tabellen anhand einer CSV Textdatei.'];

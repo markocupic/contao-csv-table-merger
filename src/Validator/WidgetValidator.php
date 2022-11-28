@@ -93,23 +93,27 @@ class WidgetValidator
             $this->inputAdapter->setPost('password_confirm', $widget->value);
         }
 
-        $arrSkipValidation = $this->stringUtilAdapter->deserialize($model->skipValidationFields, true);
+        // Important! Seems Widget::validate() takes the field value from $_POST.
+        $this->inputAdapter->setPost($widget->strField, $widget->value);
 
         // Skip validation for selected fields
+        $arrSkipValidation = $this->stringUtilAdapter->deserialize($model->skipValidationFields, true);
+
         if (!\in_array($widget->strField, $arrSkipValidation, true)) {
             // Validate input
             $widget->validate();
         }
 
-        if ('insert' === $mode) {
-            $widget = $this->validateIsUnique($widget, $arrDca, $line);
-        }
+        $intLimit = 'insert' === $mode ? 0 : 1;
+        $widget = $this->validateIsUnique($widget, $arrDca, $line, $intLimit);
 
         $widget = $this->formatter->convertDateToTimestamp($widget, $arrDca);
         $widget = $this->formatter->replaceNewlineTags($widget);
 
         if ($widget->hasErrors()) {
-            $this->message->addError($widget->getErrorsAsString(' '));
+            foreach ($widget->getErrors() as $error) {
+                $this->message->addError(sprintf('Line #%d "%s" => "%s": ', $line, $widget->strField, $widget->value).$error);
+            }
         }
 
         // Set correct empty value
@@ -127,10 +131,10 @@ class WidgetValidator
     {
         $this->controllerAdapter->loadDataContainer($tableName);
 
-        if (\is_array($GLOBALS['TL_DCA'][$tableName]['fields'][$fieldName])) {
+        if (!empty($GLOBALS['TL_DCA'][$tableName]['fields'][$fieldName]) && \is_array($GLOBALS['TL_DCA'][$tableName]['fields'][$fieldName])) {
             $arrDca = &$GLOBALS['TL_DCA'][$tableName]['fields'][$fieldName];
 
-            if (\is_string($arrDca['inputType']) && !empty($arrDca['inputType'])) {
+            if (!empty($arrDca['inputType']) && \is_string($arrDca['inputType'])) {
                 return $arrDca;
             }
         }
@@ -169,10 +173,7 @@ class WidgetValidator
         if ('date' === $rgxp || 'datim' === $rgxp || 'time' === $rgxp) {
             if (!$validatorAdapter->{'is'.ucfirst($rgxp)}($varValue)) {
                 $widget->addError(
-                    'Line #'.$line.': '.sprintf(
-                        $this->translator->trans('ERR.invalidDate', [], 'contao_default'),
-                        $widget->value,
-                    )
+                    $this->translator->trans('ERR.invalidDate', [], 'contao_default'),
                 );
             }
         }
@@ -183,7 +184,7 @@ class WidgetValidator
     /**
      * @throws Exception
      */
-    private function validateIsUnique(Widget $widget, array $arrDca, $line): Widget
+    private function validateIsUnique(Widget $widget, array $arrDca, $line, int $limit): Widget
     {
         // Make sure that unique fields are unique
         if (isset($arrDca['eval']['unique']) && true === $arrDca['eval']['unique']) {
@@ -191,17 +192,18 @@ class WidgetValidator
 
             if (\strlen((string) $varValue)) {
                 $query = sprintf(
-                    'SELECT id FROM %s WHERE %s = ?',
+                    'SELECT COUNT(%s) as counter FROM %s WHERE %s = ?',
+                    $widget->strField,
                     $widget->strTable,
                     $widget->strField,
                 );
 
-                if ($this->connection->fetchOne($query, [$varValue])) {
+                $result = $this->connection->fetchOne($query, [$varValue]);
+                $count = !$result ? 0 : $result;
+
+                if ($limit < $count) {
                     $widget->addError(
-                        sprintf(
-                            'Line #'.$line.': '.$this->translator->trans('ERR.unique', [], 'contao_default'),
-                            $widget->strField,
-                        )
+                        $this->translator->trans('ERR.unique', [], 'contao_default'),
                     );
                 }
             }

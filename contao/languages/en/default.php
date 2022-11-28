@@ -16,6 +16,9 @@ declare(strict_types=1);
  * Miscellaneous
  */
 $GLOBALS['TL_LANG']['CCTM_MSC']['mergeConfirm'] = 'Are you sure you want to start the merging process?';
+$GLOBALS['TL_LANG']['CCTM_MSC']['mergingProcessAborted'] = 'Merging process aborted';
+$GLOBALS['TL_LANG']['CCTM_MSC']['mergingProcessCompleted'] = 'Merging process completed';
+$GLOBALS['TL_LANG']['CCTM_MSC']['tableIsUpToDate'] = 'Table "%s" is already up to date and no changes were made.';
 
 /**
  * Errors

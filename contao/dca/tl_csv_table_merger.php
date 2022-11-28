@@ -12,9 +12,12 @@ declare(strict_types=1);
  * @link https://github.com/markocupic/contao-csv-table-merger
  */
 
+use Contao\DataContainer;
+use Contao\DC_Table;
+
 $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
-    'config'      => [
-        'dataContainer'    => 'Table',
+    'config'   => [
+        'dataContainer'    => DC_Table::class,
         'enableVersioning' => true,
         'sql'              => [
             'keys' => [
@@ -22,9 +25,9 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
             ],
         ],
     ],
-    'list'        => [
+    'list'     => [
         'sorting'           => [
-            'mode'        => 2,
+            'mode'        => DataContainer::MODE_SORTABLE,
             'fields'      => ['importTable ASC'],
             'panelLayout' => 'filter;sort,search,limit',
         ],
@@ -67,19 +70,19 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
             ],
         ],
     ],
-    'palettes'    => [
-        'default'      => '
+    'palettes' => [
+        'default' => '
             {title_legend},title;
-            {settings_legend},importTable,identifier,allowedFields,delimiter,enclosure,arrayDelimiter,skipValidationFields,fileSRC,deleteNonExistentRecords
+            {settings_legend},importTable,identifier,allowedFields,skipValidationFields,deleteNonExistentRecords;
+            {text_file_legend},fileSRC,delimiter,enclosure,arrayDelimiter
         ',
-        '__selector__' => [],
     ],
-    'subpalettes' => [
-        //'xxx' => 'xxx',
-    ],
-    'fields'      => [
+    'fields'   => [
         'id'                       => [
             'sql' => 'int(10) unsigned NOT NULL auto_increment',
+        ],
+        'tstamp'                   => [
+            'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
         'title'                    => [
             'exclude'   => true,
@@ -87,11 +90,8 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
             'sorting'   => true,
             'filter'    => true,
             'inputType' => 'text',
-            'eval'      => ['mandatory' => true, 'decodeEntities' => true, 'maxlength' => 255, 'tl_class' => 'w50'],
+            'eval'      => ['mandatory' => true, 'decodeEntities' => true, 'maxlength' => 255, 'tl_class' => 'w50', 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ],
-        'tstamp'                   => [
-            'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
         'importTable'              => [
             'exclude'   => true,
@@ -99,57 +99,57 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
             'sorting'   => true,
             'filter'    => true,
             'inputType' => 'select',
-            'eval'      => ['multiple' => false, 'mandatory' => true, 'includeBlankOption' => true, 'submitOnChange' => true],
+            'eval'      => ['multiple' => false, 'mandatory' => true, 'includeBlankOption' => true, 'submitOnChange' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
         'allowedFields'            => [
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => ['multiple' => true, 'mandatory' => true],
+            'eval'      => ['multiple' => true, 'mandatory' => true, 'tl_class' => 'w50'],
             'sql'       => 'blob NULL',
         ],
         'identifier'               => [
             'exclude'   => true,
             'inputType' => 'select',
-            'eval'      => ['multiple' => false, 'mandatory' => true],
+            'eval'      => ['multiple' => false, 'mandatory' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'skipValidationFields'     => [
+            'inputType' => 'select',
+            'eval'      => ['multiple' => true, 'chosen' => true, 'mandatory' => false, 'tl_class' => 'clr w50'],
+            'sql'       => 'blob NULL',
+        ],
+        'deleteNonExistentRecords' => [
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => ['tl_class' => 'w50'],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'fileSRC'                  => [
+            'exclude'   => true,
+            'inputType' => 'fileTree',
+            'eval'      => ['multiple' => false, 'fieldType' => 'radio', 'files' => true, 'filesOnly' => true, 'mandatory' => true, 'extensions' => 'csv', 'submitOnChange' => true, 'tl_class' => 'clr'],
+            'sql'       => 'binary(16) NULL',
         ],
         'delimiter'                => [
             'exclude'   => true,
             'inputType' => 'text',
             'default'   => ';',
-            'eval'      => ['mandatory' => true, 'maxlength' => 1],
+            'eval'      => ['mandatory' => true, 'maxlength' => 1, 'tl_class' => 'w50'],
             'sql'       => "varchar(4) NOT NULL default ';'",
         ],
         'enclosure'                => [
             'exclude'   => true,
             'inputType' => 'text',
-            'eval'      => ['mandatory' => true, 'useRawRequestData' => true, 'maxlength' => 1],
+            'eval'      => ['mandatory' => true, 'useRawRequestData' => true, 'maxlength' => 1, 'tl_class' => 'w50'],
             'sql'       => "varchar(4) NOT NULL default '\"'",
         ],
         'arrayDelimiter'           => [
             'exclude'   => true,
             'inputType' => 'text',
             'default'   => '||',
-            'eval'      => ['mandatory' => true, 'useRawRequestData' => true, 'maxlength' => 2],
+            'eval'      => ['mandatory' => true, 'useRawRequestData' => true, 'maxlength' => 2, 'tl_class' => 'w50'],
             'sql'       => "varchar(4) NOT NULL default '||'",
-        ],
-        'skipValidationFields'     => [
-            'inputType' => 'select',
-            'eval'      => ['multiple' => true, 'chosen' => true, 'mandatory' => false],
-            'sql'       => 'blob NULL',
-        ],
-        'fileSRC'                  => [
-            'exclude'   => true,
-            'inputType' => 'fileTree',
-            'eval'      => ['multiple' => false, 'fieldType' => 'radio', 'files' => true, 'filesOnly' => true, 'mandatory' => true, 'extensions' => 'csv', 'submitOnChange' => true],
-            'sql'       => 'binary(16) NULL',
-        ],
-        'deleteNonExistentRecords' => [
-            'exclude'   => true,
-            'inputType' => 'checkbox',
-            'eval'      => [],
-            'sql'       => "char(1) NOT NULL default ''",
         ],
     ],
 ];

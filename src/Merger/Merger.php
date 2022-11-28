@@ -16,10 +16,12 @@ namespace Markocupic\ContaoCsvTableMerger\Merger;
 
 use Contao\CoreBundle\Framework\Adapter;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\CoreBundle\Monolog\ContaoContext;
 use Contao\Database;
 use Contao\FilesModel;
 use Contao\StringUtil;
 use Contao\System;
+use Contao\Versions;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use League\Csv\InvalidArgument;
@@ -29,9 +31,14 @@ use Markocupic\ContaoCsvTableMerger\DataRecord\DataRecord;
 use Markocupic\ContaoCsvTableMerger\Message\Message;
 use Markocupic\ContaoCsvTableMerger\Model\CsvTableMergerModel;
 use Markocupic\ContaoCsvTableMerger\Validator\WidgetValidator;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LogLevel;
 
-class Merger
+class Merger implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     private ContaoFramework $framework;
     private Connection $connection;
     private WidgetValidator $widgetValidator;
@@ -200,12 +207,13 @@ class Merger
         $arrRecord = $objDataRecord->getData();
 
         foreach ($arrRecord as $fieldName => $varValue) {
-            $arrRecord[$fieldName] = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'insert');
+            $varValue = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'insert');
+            $arrRecord[$fieldName] = \is_array($varValue) ? serialize($varValue) : $varValue;
         }
 
         $objDataRecord->setData($arrRecord);
 
-        if ($objDataRecord->getStoreData()) {
+        if (!$this->message->hasError() && $objDataRecord->getStoreData()) {
             $affected = (bool) $this->connection->insert($this->importTable, $arrRecord);
 
             if ($affected) {
@@ -223,9 +231,22 @@ class Merger
                         $arrRecord[$this->identifier]
                     )
                 );
+
+                // System log
+                if (null !== $this->logger) {
+                    $this->logger->log(
+                        LogLevel::INFO,
+                        sprintf(
+                            'A new entry "%s.id=%d" has been created',
+                            $this->importTable,
+                            $insertId
+                        ),
+                        ['contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL)],
+                    );
+                }
             }
         } else {
-            $this->message->addError(
+            $this->message->addInfo(
                 sprintf(
                     'Line #%d: Skipped database insert for data record with identifier "%s.%s = %s".',
                     $objDataRecord->getCurrentLine(),
@@ -267,7 +288,7 @@ class Merger
 
         $objDataRecord = $this->triggerBeforeUpdateHook($objDataRecord);
 
-        if ($objDataRecord->getStoreData()) {
+        if (!$this->message->hasError() && $objDataRecord->getStoreData()) {
             // New state
             $arrRecord = $objDataRecord->getData();
 
@@ -275,7 +296,8 @@ class Merger
             $arrCurrent = $objDataRecord->getTargetRecord();
 
             foreach ($arrRecord as $fieldName => $varValue) {
-                $arrRecord[$fieldName] = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'update');
+                $varValue = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'update');
+                $arrRecord[$fieldName] = \is_array($varValue) ? serialize($varValue) : $varValue;
             }
 
             $objDataRecord->setData($arrRecord);
@@ -290,6 +312,13 @@ class Merger
                     }
                 }
 
+                $this->triggerPostUpdateHook($this->importTable, (int) $arrCurrent['id']);
+
+                // Create new version
+                $objVersions = new Versions($objDataRecord->getImportTable(), $arrCurrent['id']);
+                $objVersions->initialize();
+                $objVersions->create();
+
                 $this->message->addInfo(
                     sprintf(
                         'Line #%d: Updated data record with identifier "%s.%s = %s".',
@@ -300,8 +329,16 @@ class Merger
                     )
                 );
             }
-
-            $this->triggerPostUpdateHook($this->importTable, (int) $arrCurrent['id'], $affected);
+        } else {
+            $this->message->addInfo(
+                sprintf(
+                    'Line #%d: Skipped data record update for data record with identifier "%s.%s = %s".',
+                    $objDataRecord->getCurrentLine(),
+                    $this->importTable,
+                    $this->identifier,
+                    $arrRecord[$this->identifier]
+                )
+            );
         }
     }
 
@@ -342,13 +379,13 @@ class Merger
         }
     }
 
-    private function triggerPostUpdateHook(string $importTable, int $id, bool $affected): void
+    private function triggerPostUpdateHook(string $importTable, int $id): void
     {
         // HOOK: add custom logic
         if (isset($GLOBALS['TL_HOOKS']['csvTableMergerPostUpdate']) && \is_array($GLOBALS['TL_HOOKS']['csvTableMergerPostUpdate'])) {
             foreach ($GLOBALS['TL_HOOKS']['csvTableMergerPostUpdate'] as $callback) {
                 $objHook = $this->systemAdapter->importStatic($callback[0]);
-                $objHook->{$callback[1]}($importTable, $id, $affected);
+                $objHook->{$callback[1]}($importTable, $id);
             }
         }
     }
@@ -363,25 +400,36 @@ class Merger
         if (!empty($arrIdentifiers)) {
             $arrDelIdentifiers = $this->connection->fetchFirstColumn(
                 sprintf(
-                    "SELECT %s FROM %s WHERE %s NOT IN('%s')",
-                    $this->identifier,
+                    "SELECT id FROM %s WHERE %s NOT IN('%s')",
                     $this->importTable,
                     $this->identifier,
                     implode("', '", $arrIdentifiers),
                 )
             );
 
-            foreach ($arrDelIdentifiers as $identifier) {
-                $affected = (bool) $this->connection->delete($this->importTable, [$this->identifier => $identifier]);
+            foreach ($arrDelIdentifiers as $intId) {
+                $affected = (bool) $this->connection->delete($this->importTable, ['id' => $intId]);
 
                 if ($affected) {
                     $this->message->addInfo(
                         sprintf(
-                            'Deleted data record with "%s.%s = %s"',
+                            'Delete data record with "%s.id = %s"',
                             $this->importTable,
-                            $this->identifier,
-                            $identifier,
+                            $intId,
                         )
+                    );
+                }
+
+                // System log
+                if (null !== $this->logger) {
+                    $this->logger->log(
+                        LogLevel::INFO,
+                        sprintf(
+                            'DELETE FROM %s WHERE id=%d',
+                            $this->importTable,
+                            $intId,
+                        ),
+                        ['contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL)],
                     );
                 }
             }

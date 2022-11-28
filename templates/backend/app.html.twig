@@ -2,18 +2,18 @@
     <div id="tl_buttons">
         <a href="contao" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()">{{ 'MSC.goBack'|trans({}, 'contao_default') }}</a>
     </div>
-    
+
     <div class="tl_listing_container list_view cctm-app-inner">
         {% if messages.has_error %}
-            <h2 class="cctm-h2-error">Merging process aborted!</h2>
+            <h2 class="cctm-h2-error">{{ 'CCTM_MSC.mergingProcessAborted'|trans({}, 'contao_default') }}</h2>
         {% else %}
-            <h2 class="cctm-h2-success">Merging process completed</h2>
+            <h2 class="cctm-h2-success">{{ 'CCTM_MSC.mergingProcessCompleted'|trans({}, 'contao_default') }}</h2>
         {% endif %}
 
         <div class="cctm-summary-box">
             {% if not messages.has_error and not messages.has_info %}
                 <div class="cctm-summary-box-item-info">
-                    <p><code>The table "{{ import_table }}" is up to date.</code></p>
+                    <p><code>{{ 'CCTM_MSC.tableIsUpToDate'|trans({import_table}, 'contao_default') }}</code></p>
                 </div>
             {% elseif messages.has_error %}
                 {% for error in messages.errors %}
@@ -34,7 +34,7 @@
 
     <div class="tl_formbody_submit">
         <div class="tl_submit_container">
-            <button class="tl_submit" onclick="javascript:location.href='/contao'">{{ 'MSC.goBack'|trans({}, 'contao_default') }}</button>
+            <button class="tl_submit" onclick="javascript:location.href='contao'">{{ 'MSC.goBack'|trans({}, 'contao_default') }}</button>
         </div>
     </div>
 </div>
