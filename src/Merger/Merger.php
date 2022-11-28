@@ -408,14 +408,18 @@ class Merger implements LoggerAwareInterface
             );
 
             foreach ($arrDelIdentifiers as $intId) {
+                $valIdentifier = $this->connection->fetchOne(sprintf('SELECT %s FROM %s WHERE id = ?', $this->identifier, $this->importTable), [$intId]);
                 $affected = (bool) $this->connection->delete($this->importTable, ['id' => $intId]);
 
                 if ($affected) {
                     $this->message->addInfo(
                         sprintf(
-                            'Delete data record with "%s.id = %s"',
+                            'Delete data record with "%s.id = %s" and identifier "%s.%s = %s"',
                             $this->importTable,
                             $intId,
+                            $this->importTable,
+                            $this->identifier,
+                            $valIdentifier,
                         )
                     );
                 }
