@@ -18,11 +18,12 @@ use Contao\Controller;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\DataContainer;
 use Doctrine\DBAL\Exception;
-use Haste\Util\Url;
+use JustSteveKing\UriBuilder\Uri;
 use Markocupic\ContaoCsvTableMerger\Merger\Merger;
 use Markocupic\ContaoCsvTableMerger\Message\Message;
 use Markocupic\ContaoCsvTableMerger\Model\CsvTableMergerModel;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment as TwigEnvironment;
 use Twig\Error\LoaderError;
@@ -32,13 +33,15 @@ use Twig\Error\SyntaxError;
 class CsvTableMergeController
 {
     private ContaoFramework $framework;
+    private RequestStack $requestStack;
     private TwigEnvironment $twig;
     private Merger $merger;
     private Message $message;
 
-    public function __construct(ContaoFramework $framework, TwigEnvironment $twig, Merger $merger, Message $message)
+    public function __construct(ContaoFramework $framework, RequestStack $requestStack, TwigEnvironment $twig, Merger $merger, Message $message)
     {
         $this->framework = $framework;
+        $this->requestStack = $requestStack;
         $this->twig = $twig;
         $this->merger = $merger;
         $this->message = $message;
@@ -59,9 +62,11 @@ class CsvTableMergeController
 
         $this->merger->run($model);
 
-        $url = Url::addQueryString('key=renderSummaryAction');
+        $request = $this->requestStack->getCurrentRequest();
+        $url = Uri::fromString($request->getUri());
+        $url->addQueryParam('key','renderSummaryAction');
 
-        return new RedirectResponse($url);
+        return new RedirectResponse($url->toString());
     }
 
     /**

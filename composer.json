@@ -26,7 +26,7 @@
         "php": "^7.4 || ^8.0",
         "contao/core-bundle": "^4.13 || ^5.0",
         "league/csv": "^9.7",
-        "codefog/contao-haste": "^4.25",
+        "juststeveking/uri-builder": "^1.0 || ^1.1",
         "yidas/google-maps-services": "^1.0"
     },
     "require-dev": {
