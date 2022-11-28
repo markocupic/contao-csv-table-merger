@@ -112,7 +112,7 @@ class WidgetValidator
 
         if ($widget->hasErrors()) {
             foreach ($widget->getErrors() as $error) {
-                $this->message->addError(sprintf('Line #%d "%s" => "%s": ', $line, $widget->strField, $widget->value).$error);
+                $this->message->addError(sprintf('Line #%d "%s" => "%s": ', $line, $widget->strField, is_array($widget->value) ? \Safe\json_encode($widget->value) : (string) $widget->value).$error);
             }
         }
 

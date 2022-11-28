@@ -50,23 +50,22 @@ class Formatter
 
     public function convertToArray(Widget $widget, array $arrDca, string $arrayDelimiter): Widget
     {
+        /** @var StringUtil $stringUtilAdapter */
+        $stringUtilAdapter = $this->framework->getAdapter(StringUtil::class);
+
         $varValue = $widget->value;
 
-        if (!\is_array($varValue) && isset($arrDca['eval']['multiple']) && $arrDca['eval']['multiple']) {
-            // Convert CSV fields
-            if (isset($arrDca['eval']['csv'])) {
-                if (null === $varValue || '' === $varValue) {
-                    $varValue = [];
-                } else {
-                    $varValue = explode($arrDca['eval']['csv'], $varValue);
-                }
-            } elseif (false !== strpos($varValue, $arrayDelimiter)) {
+        if (!\is_array($varValue) && isset($arrDca['eval']['multiple']) && true === $arrDca['eval']['multiple']) {
+            $varValue = (string) $varValue;
+
+            if ('' === $varValue) {
+                $varValue = [];
+            } elseif (isset($arrDca['eval']['csv']) && \strlen((string) $arrDca['eval']['csv'])) {
+                $varValue = $stringUtilAdapter->trimsplit($arrDca['eval']['csv'], $varValue);
+            } elseif (strlen($arrayDelimiter) && false !== strpos($varValue, $arrayDelimiter)) {
                 // Value is e.g. 3||4
                 $varValue = explode($arrayDelimiter, $varValue);
             } else {
-                /** @var StringUtil $stringUtilAdapter */
-                $stringUtilAdapter = $this->framework->getAdapter(StringUtil::class);
-
                 // The value is a serialized array or simple value e.g 3
                 $varValue = $stringUtilAdapter->deserialize($varValue, true);
             }

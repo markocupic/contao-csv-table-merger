@@ -55,7 +55,7 @@ class GeocodingListener extends AbstractContaoHook
             $arrRecordOld = $dataRecord->getTargetRecord();
 
             if ($arrRecordOld) {
-                if ($arrRecordOld['street'] !== $arrRecord['street'] || $arrRecordOld['postal'] !== $arrRecord['postal'] || $arrRecordOld['city'] !== $arrRecord['city']) {
+                if (empty($arrRecord['longitude']) || empty($arrRecord['latitude']) || $arrRecordOld['street'] !== $arrRecord['street'] || $arrRecordOld['postal'] !== $arrRecord['postal'] || $arrRecordOld['city'] !== $arrRecord['city']) {
                     $arrAddress = [];
                     $arrAddress[] = $arrRecord['street'];
                     $arrAddress[] = trim($arrRecord['postal'].' '.$arrRecord['city']);
@@ -75,10 +75,15 @@ class GeocodingListener extends AbstractContaoHook
                         $arrRecord['latitude'] = '';
                     }
 
-                    $dataRecord->setData($arrRecord);
                 }
             }
+        }else{
+            $arrRecord['longitude'] = '';
+            $arrRecord['latitude'] = '';
         }
+
+        $dataRecord->setData($arrRecord);
+
 
         return $dataRecord;
     }
