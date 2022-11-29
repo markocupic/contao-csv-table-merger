@@ -66,28 +66,10 @@ class BeforeInsertListener extends AbstractContaoHook
             }
         }
 
-        // Encode password
-        $arrRecord = $this->setPassword($arrRecord, $dataRecord->getImportTable());
-
         $dataRecord->setData($arrRecord);
 
         return $dataRecord;
     }
 
-    private function setPassword(array $arrRecord, string $importTable): array
-    {
-        if (Database::getInstance()->fieldExists('password', $importTable)) {
-            if (isset($arrRecord['password']) && !empty($arrRecord['password'])) {
-                $passwordHasher = $this->passwordHasherFactory->getPasswordHasher(FrontendUser::class);
 
-                if ('tl_user' === $importTable) {
-                    $passwordHasher = $this->passwordHasherFactory->getPasswordHasher(BackendUser::class);
-                }
-
-                $arrRecord['password'] = $passwordHasher->hash($arrRecord['password']);
-            }
-        }
-
-        return $arrRecord;
-    }
 }

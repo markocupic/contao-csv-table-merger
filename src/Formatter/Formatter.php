@@ -28,10 +28,8 @@ class Formatter
         $this->framework = $framework;
     }
 
-    public function getCorrectDateFormat(Widget $widget, array $arrDca): Widget
+    public function convertToCorrectDateFormat($varValue, array $arrDca)
     {
-        $varValue = $widget->value;
-
         $rgxp = $arrDca['eval']['rgxp'] ?? null;
 
         if (('date' === $rgxp || 'datim' === $rgxp || 'time' === $rgxp) && '' !== $varValue) {
@@ -43,17 +41,13 @@ class Formatter
             }
         }
 
-        $widget->value = $varValue;
-
-        return $widget;
+        return $varValue;
     }
 
-    public function convertToArray(Widget $widget, array $arrDca, string $arrayDelimiter): Widget
+    public function convertToArray($varValue, array $arrDca, string $arrayDelimiter)
     {
         /** @var StringUtil $stringUtilAdapter */
         $stringUtilAdapter = $this->framework->getAdapter(StringUtil::class);
-
-        $varValue = $widget->value;
 
         if (!\is_array($varValue) && isset($arrDca['eval']['multiple']) && true === $arrDca['eval']['multiple']) {
             $varValue = (string) $varValue;
@@ -62,7 +56,7 @@ class Formatter
                 $varValue = [];
             } elseif (isset($arrDca['eval']['csv']) && \strlen((string) $arrDca['eval']['csv'])) {
                 $varValue = $stringUtilAdapter->trimsplit($arrDca['eval']['csv'], $varValue);
-            } elseif (strlen($arrayDelimiter) && false !== strpos($varValue, $arrayDelimiter)) {
+            } elseif (\strlen($arrayDelimiter) && false !== strpos($varValue, $arrayDelimiter)) {
                 // Value is e.g. 3||4
                 $varValue = explode($arrayDelimiter, $varValue);
             } else {
@@ -71,41 +65,38 @@ class Formatter
             }
         }
 
-        $widget->value = $varValue;
-
-        return $widget;
+        return $varValue;
     }
 
-    public function convertDateToTimestamp(Widget $widget, array $arrDca): Widget
+    public function convertDateToTimestamp($varValue, array $arrDca)
     {
         $rgxp = $arrDca['eval']['rgxp'] ?? null;
 
         if ('date' === $rgxp || 'datim' === $rgxp || 'time' === $rgxp) {
-            $widget->value = trim((string) $widget->value);
+            $varValue = trim((string) $varValue);
 
-            if (empty($widget->value)) {
-                $widget->value = $widget->getEmptyValue();
+            if (empty($varValue)) {
+                /** @var Widget $widgetAdapter */
+                $widgetAdapter = $this->framework->getAdapter(Widget::class);
 
-                return $widget;
+                return $widgetAdapter->getEmptyValueByFieldType($arrDca['sql'] ?? null);
             }
 
-            if (false !== ($widget->value = strtotime($widget->value))) {
-                return $widget;
+            if (false !== ($varValue = strtotime($varValue))) {
+                return $varValue;
             }
-
-            $widget->addError(sprintf('Invalid value "%s" set for field "%s.%s".', $widget->value, $widget->strTable, $widget->strField));
         }
 
-        return $widget;
+        return $varValue;
     }
 
-    public function replaceNewlineTags(Widget $widget): Widget
+    public function replaceNewlineTags($varValue)
     {
-        if (\is_string($widget->value)) {
+        if (\is_string($varValue)) {
             // Replace all '[NEWLINE]' tags with the end of line tag
-            $widget->value = str_replace('[NEWLINE]', PHP_EOL, $widget->value);
+            $varValue = str_replace('[NEWLINE]', PHP_EOL, $varValue);
         }
 
-        return $widget;
+        return $varValue;
     }
 }

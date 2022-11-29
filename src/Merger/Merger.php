@@ -223,7 +223,7 @@ class Merger implements LoggerAwareInterface
 
                 $this->message->addInfo(
                     sprintf(
-                        'Line #%d: Inserted new data record with ID %d and identifier "%s.%s =  %s".',
+                        'Line #%d: Insert new data record with ID %d and identifier "%s.%s =  %s".',
                         $objDataRecord->getCurrentLine(),
                         $insertId,
                         $this->importTable,
@@ -321,7 +321,7 @@ class Merger implements LoggerAwareInterface
 
                 $this->message->addInfo(
                     sprintf(
-                        'Line #%d: Updated data record with identifier "%s.%s = %s".',
+                        'Line #%d: Update data record with identifier "%s.%s = %s".',
                         $objDataRecord->getCurrentLine(),
                         $this->importTable,
                         $this->identifier,
