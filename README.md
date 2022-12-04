@@ -40,5 +40,14 @@ Alle [NEWLINE] tags in der CSV Datei werden beim Import-Vorgang in \r\n bzw. \n 
 ![Alt text](docs/backend.png?raw=true "Backend")
 
 
+### Konfiguration
+Es gibt mehrere Parameter, die man über `config/config.yml` konfigurieren kann. Am meisten dürfte wohl die maximale Anzahl an Datensätzen, welche pro Request verarbeitet werden, interessieren.
+```
+# In your config/config.yml add your configuration
+
+markocupic_contao_csv_table_merger:
+  max_inserts_per_request: 20
+
+```
 ### Danksagung!
 Grossen Dank an https://www.mockaroo.com/
