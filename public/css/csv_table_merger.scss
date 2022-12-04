@@ -1,19 +1,45 @@
 .cctm-app {
+
+
   .cctm-app-inner {
+    [v-cloak] {
+      visibility: hidden;
+    }
+
     h2 {
       margin-bottom: 2rem;
     }
 
-    p {
-      margin-bottom: 2rem;
-    }
-
-    .cctm-h2-error {
-      color: red;
-    }
-
-    .cctm-h2-success {
+    .cctm-request-info {
       color: green;
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 10px;
+      margin-bottom: 1rem;
+
+      span {
+        margin-right: 2rem;
+      }
+    }
+
+    .cctm-status-box {
+      padding: 1rem;
+
+      p {
+        margin: 0;
+      }
+    }
+
+    .cctm-status-success {
+      background-color: rgba(0, 128, 0, 0.33);
+    }
+
+    .cctm-status-pending {
+      background-color: rgb(245, 245, 245);
+    }
+
+    .cctm-status-error {
+      background-color: rgba(250, 150, 150, 0.73);
     }
 
     .cctm-summary-box {
@@ -21,12 +47,11 @@
       padding: 1rem;
       display: block;
 
-
       p {
         line-height: 1.8;
         font-size: 11px;
-        padding:0;
-        margin:0;
+        padding: 0;
+        margin: 0;
         margin-bottom: 0.4rem;
         background: 0 !important;
       }
@@ -39,6 +64,23 @@
         color: greenyellow;
       }
     }
+  }
+
+  .cctm-progress-bar-container {
+    margin: 15px 0;
+    background-color: #fbfbfb;
+  }
+
+  .cctm-progress-bar-container .cctm-progress-bar-inner {
+    height: 30px;
+    width: 0;
+    background-color: #5eaf4c;
+    transition: width 1.5s ease;
+    line-height: 1.5;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

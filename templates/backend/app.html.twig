@@ -5,14 +5,35 @@
 
 
     <div id="vueApplication" class="tl_listing_container list_view cctm-app-inner">
-        <p>
-            Record count: [[ record_count ]],&nbsp;
-            Requests required: [[ requests_required ]],&nbsp;
-            Requests remained: [[ requests_remained ]],&nbsp;
-            Requests completed: [[ requests_completed ]]&nbsp;
-        </p>
-        <div class="cctm-summary-box" v-html="messages"></div>
+        <div v-cloak>
 
+            <h2>{{ model.title }}</h2>
+
+            <div class="cctm-request-info">
+                <span>Record count: [[ record_count ]],&nbsp;</span>
+                <span>Requests required: [[ requests_required ]],&nbsp;</span>
+                <span>Requests pending: [[ requests_pending ]],&nbsp;</span>
+                <span>Requests completed: [[ requests_completed ]]&nbsp;</span>
+            </div>
+            <div v-if="merging_process_stopped_with_error" class="cctm-status-box cctm-merging-process-stopped-with-error cctm-status-error">
+                <p>Merging process stopped with an error. Please check your system log.</p>
+            </div>
+            <div v-else-if="merging_process_completed" class="cctm-status-box cctm-merging-process-completed cctm-status-success">
+                <p>Merging process completed. You may now close the window.</p>
+            </div>
+            <div v-else class="cctm-status-box cctm-merging-process-pending cctm-status-pending">
+                <p>Merging process started. Please do not close the window.</p>
+            </div>
+
+            <div class="cctm-progress-bar-container">
+                <div id="importProgress" class="cctm-progress-bar-inner">
+                    <span class="cctm-percentage"></span>
+                </div>
+            </div>
+
+            <div class="cctm-summary-box" v-html="messages"></div>
+
+        </div>
     </div>
 
     <div class="tl_formbody_submit">
@@ -26,6 +47,4 @@
     window.addEventListener('DOMContentLoaded', (event) => {
         const tableMergerApplication = new TableMergeApp('#vueApplication', {{ options|json_encode()|raw }});
     });
-
-
 </script>

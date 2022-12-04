@@ -103,11 +103,11 @@ class CsvTableMergeController
             ArrayAttributeBag::KEY_MAX_INSERTS_PER_REQUEST => $this->appConfig['max_inserts_per_request'],
             ArrayAttributeBag::KEY_RECORD_COUNT => -1,
             ArrayAttributeBag::KEY_REQUESTS_COMPLETED => 0,
-            ArrayAttributeBag::KEY_REQUESTS_REMAINED => -1,
+            ArrayAttributeBag::KEY_REQUESTS_PENDING => -1,
             ArrayAttributeBag::KEY_REQUESTS_REQUIRED => -1,
             ArrayAttributeBag::KEY_MESSAGES => '',
-            ArrayAttributeBag::KEY_IMPORT_PROCESS_COMPLETED => false,
-            ArrayAttributeBag::KEY_IMPORT_PROCESS_STOPPED_WITH_ERROR => false,
+            ArrayAttributeBag::KEY_MERGING_PROCESS_COMPLETED => false,
+            ArrayAttributeBag::KEY_MERGING_PROCESS_STOPPED_WITH_ERROR => false,
         ];
 
         foreach ($sessionAttributes as $key => $value) {
@@ -121,7 +121,7 @@ class CsvTableMergeController
         return new Response($this->twig->render(
             '@MarkocupicContaoCsvTableMerger/backend/app.html.twig',
             [
-                'import_table' => $model->importTable,
+                'model' => $model->row(),
                 'options' => [
                     'delimiters' => "'[[',']]'",
                     'session_key' => $sessionKey,

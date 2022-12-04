@@ -19,9 +19,6 @@ use Markocupic\ContaoCsvTableMerger\Controller\Backend\CsvTableMergeController;
 $GLOBALS['BE_MOD']['system']['csv_table_merger'] = array(
     'tables' => array('tl_csv_table_merger'),
     'appAction' => [CsvTableMergeController::class, 'appAction'],
-    'stylesheet' => [
-        'bundles/markocupiccontaocsvtablemerger/css/csv_table_merger.css',
-    ],
 );
 
 /**

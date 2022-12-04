@@ -24,9 +24,10 @@ class TableMergeApp {
                     initialization_succeed: false,
                     record_count: -1,
                     requests_required: -1,
-                    requests_remained: -1,
+                    requests_pending: -1,
                     requests_completed: -1,
-                    import_process_stopped_with_error: false,
+                    merging_process_stopped_with_error: false,
+                    merging_process_completed: false,
                 }
             },
 
@@ -35,7 +36,7 @@ class TableMergeApp {
             // This function will be called when the component is mounted.
             async mounted() {
                 await this.initialize();
-                if (this.initialization_succeed && !this.import_process_stopped_with_error) {
+                if (this.initialization_succeed && !this.merging_process_stopped_with_error) {
                     await this.run();
                 }
             },
@@ -50,13 +51,16 @@ class TableMergeApp {
                                 this.messages = this.messages + data.messages;
                                 this.record_count = data.record_count;
                                 this.requests_required = data.requests_required;
-                                this.requests_remained = data.requests_remained;
+                                this.requests_pending = data.requests_pending;
                                 this.requests_completed = data.requests_completed;
 
                             } else {
                                 this.initialization_succeed = false;
-                                this.import_process_stopped_with_error = true;
+                                this.merging_process_stopped_with_error = true;
                             }
+                            this.updateProgressBar();
+                        }).catch(function (error) {
+                            this.merging_process_stopped_with_error = true;
                         });
                 },
 
@@ -66,17 +70,41 @@ class TableMergeApp {
                         .then((data) => {
                             if (data.success === true) {
                                 this.messages = this.messages + data.messages;
-                                this.requests_remained = data.requests_remained;
-                                if(parseInt(data.requests_remained) > 0)
-                                {
-                                    window.setTimeout(() => this.run(), 2000);
-                                }else{
-                                    console.log('fertig');
+                                this.requests_pending = data.requests_pending;
+                                this.requests_completed = data.requests_completed;
+
+                                if (parseInt(data.requests_pending) > 0) {
+                                    this.updateProgressBar();
+                                    this.run();
+                                } else {
+                                    this.merging_process_completed = true;
+                                    this.updateProgressBar();
                                 }
                             } else {
-                                this.import_process_stopped_with_error = true;
+                                if (data.messages) {
+                                    this.messages = this.messages + data.messages;
+                                }
+                                this.updateProgressBar();
+                                this.merging_process_stopped_with_error = true;
                             }
+                        }).catch(function (error) {
+                            this.merging_process_stopped_with_error = true;
                         });
+                },
+
+                updateProgressBar: function updateProgressBar() {
+                    const bar = document.getElementById('importProgress');
+                    const percentage = document.querySelector('#importProgress .cctm-percentage');
+                    if (bar && this.requests_required > 0) {
+                        let perc = Math.ceil(this.requests_completed / this.requests_required * 100);
+                        if (this.requests_pending === 0) {
+                            let perc = 100;
+                        }
+                        bar.style.width = perc + '%';
+                        if (percentage) {
+                            percentage.innerHTML = perc + ' %';
+                        }
+                    }
                 }
             },
         });

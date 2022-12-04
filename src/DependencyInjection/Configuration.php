@@ -36,8 +36,8 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('fields_newer_update')
                     ->info('A list of table fields that are not allowed to update.')
                     ->example(['id', 'dateAdded', 'password'])
-                    ->scalarPrototype()->end()
                     ->defaultValue(['id', 'password', 'dateAdded', 'addedOn'])
+                    ->scalarPrototype()->end()
                 ->end()
              ->end()
         ;

@@ -48,7 +48,6 @@ class GeocodingListener extends AbstractContaoHook
         if (empty($this->appConfig['google_api_key'])) {
             return $dataRecord;
         }
-        return $dataRecord;
 
         $arrRecord = $dataRecord->getData();
 

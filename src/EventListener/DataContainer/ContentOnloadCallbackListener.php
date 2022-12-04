@@ -23,7 +23,8 @@ class ContentOnloadCallbackListener
 {
     public function __invoke(): void
     {
-        $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/markocupiccontaocsvtablemerger/js/vuejs/vue.global@3.2.45.js';
+        $GLOBALS['TL_CSS'][] = 'bundles/markocupiccontaocsvtablemerger/css/csv_table_merger.css';
+        $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/markocupiccontaocsvtablemerger/js/vuejs/vue.global@3.2.45.prod.js';
         $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/markocupiccontaocsvtablemerger/js/TableMergeApp.js';
     }
 }

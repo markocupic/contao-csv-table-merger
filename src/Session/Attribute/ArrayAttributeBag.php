@@ -14,10 +14,8 @@ declare(strict_types=1);
 
 namespace Markocupic\ContaoCsvTableMerger\Session\Attribute;
 
-use Contao\CoreBundle\Framework\ContaoFramework;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
  * Class ArrayAttributeBag.
@@ -43,14 +41,12 @@ class ArrayAttributeBag extends AttributeBag implements \ArrayAccess
     public const KEY_RECORD_COUNT = 'record_count';
     public const KEY_REQUESTS_REQUIRED = 'requests_required';
     public const KEY_REQUESTS_COMPLETED = 'requests_completed';
-    public const KEY_REQUESTS_REMAINED = 'requests_remained';
+    public const KEY_REQUESTS_PENDING = 'requests_pending';
     public const KEY_MESSAGES = 'messages';
-    public const KEY_IMPORT_PROCESS_COMPLETED = 'import_process_completed';
-    public const KEY_IMPORT_PROCESS_STOPPED_WITH_ERROR = 'import_process_stopped_with_error';
+    public const KEY_MERGING_PROCESS_COMPLETED = 'merging_process_completed';
+    public const KEY_MERGING_PROCESS_STOPPED_WITH_ERROR = 'merging_process_stopped_with_error';
 
-    private ContaoFramework $framework;
     private RequestStack $requestStack;
-    private ?SessionInterface $session;
 
     public function __construct(RequestStack $requestStack, string $storageKey = '')
     {

@@ -1,14 +1,33 @@
+.cctm-app .cctm-app-inner [v-cloak] {
+  visibility: hidden;
+}
 .cctm-app .cctm-app-inner h2 {
   margin-bottom: 2rem;
 }
-.cctm-app .cctm-app-inner p {
-  margin-bottom: 2rem;
-}
-.cctm-app .cctm-app-inner .cctm-h2-error {
-  color: red;
-}
-.cctm-app .cctm-app-inner .cctm-h2-success {
+.cctm-app .cctm-app-inner .cctm-request-info {
   color: green;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 10px;
+  margin-bottom: 1rem;
+}
+.cctm-app .cctm-app-inner .cctm-request-info span {
+  margin-right: 2rem;
+}
+.cctm-app .cctm-app-inner .cctm-status-box {
+  padding: 1rem;
+}
+.cctm-app .cctm-app-inner .cctm-status-box p {
+  margin: 0;
+}
+.cctm-app .cctm-app-inner .cctm-status-success {
+  background-color: rgba(0, 128, 0, 0.33);
+}
+.cctm-app .cctm-app-inner .cctm-status-pending {
+  background-color: whitesmoke;
+}
+.cctm-app .cctm-app-inner .cctm-status-error {
+  background-color: rgba(250, 150, 150, 0.73);
 }
 .cctm-app .cctm-app-inner .cctm-summary-box {
   background-color: #0a0a0a;
@@ -28,6 +47,21 @@
 }
 .cctm-app .cctm-app-inner .cctm-summary-box .tl_info, .cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-info {
   color: greenyellow;
+}
+.cctm-app .cctm-progress-bar-container {
+  margin: 15px 0;
+  background-color: #fbfbfb;
+}
+.cctm-app .cctm-progress-bar-container .cctm-progress-bar-inner {
+  height: 30px;
+  width: 0;
+  background-color: #5eaf4c;
+  transition: width 1.5s ease;
+  line-height: 1.5;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /*# sourceMappingURL=csv_table_merger.css.map */

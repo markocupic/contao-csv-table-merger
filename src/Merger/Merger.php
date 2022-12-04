@@ -140,11 +140,6 @@ class Merger implements LoggerAwareInterface
                 }
             }
 
-            // Delete all db records that are not in the list.
-            if ($this->model->deleteNonExistentRecords) {
-                $this->deleteNonExistentRecords();
-            }
-
             // Do not update/insert if there was an error!
             if ($this->message->hasError()) {
                 $this->connection->rollBack();
@@ -154,6 +149,58 @@ class Merger implements LoggerAwareInterface
             $this->connection->rollBack();
 
             throw $e;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function deleteNonExistentRecords(CsvTableMergerModel $model): void
+    {
+        $this->initialize($model);
+
+        $arrIdentifiers = array_column($this->getRecordsFromCsv(), $this->identifier);
+
+        if (!empty($arrIdentifiers)) {
+            $arrDelIdentifiers = $this->connection->fetchFirstColumn(
+                sprintf(
+                    "SELECT id FROM %s WHERE %s NOT IN('%s')",
+                    $this->importTable,
+                    $this->identifier,
+                    implode("', '", $arrIdentifiers),
+                )
+            );
+
+            foreach ($arrDelIdentifiers as $intId) {
+                $valIdentifier = $this->connection->fetchOne(sprintf('SELECT %s FROM %s WHERE id = ?', $this->identifier, $this->importTable), [$intId]);
+                $affected = (bool) $this->connection->delete($this->importTable, ['id' => $intId]);
+
+                if ($affected) {
+                    $this->message->addInfo(
+                        sprintf(
+                            'Delete data record with "%s.id = %s" and identifier "%s.%s = %s"',
+                            $this->importTable,
+                            $intId,
+                            $this->importTable,
+                            $this->identifier,
+                            $valIdentifier,
+                        )
+                    );
+                }
+
+                // System log
+                if (null !== $this->logger) {
+                    $this->logger->log(
+                        LogLevel::INFO,
+                        sprintf(
+                            'DELETE FROM %s WHERE id=%d',
+                            $this->importTable,
+                            $intId,
+                        ),
+                        ['contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL)],
+                    );
+                }
+            }
         }
     }
 
@@ -181,6 +228,7 @@ class Merger implements LoggerAwareInterface
      */
     private function getRecordsFromCsv(int $offset = 0, int $limit = 0): array
     {
+        // Get from cache
         if (isset($this->records[$offset.'_'.$limit]) && \is_array($this->records[$offset.'_'.$limit])) {
             return $this->records[$offset.'_'.$limit];
         }
@@ -210,6 +258,7 @@ class Merger implements LoggerAwareInterface
             $arrRecords[] = array_map('trim', $arrRecord);
         }
 
+        // Cache resultss
         $this->records[$offset.'_'.$limit] = $arrRecords;
 
         return $arrRecords;
@@ -238,6 +287,10 @@ class Merger implements LoggerAwareInterface
         foreach ($arrRecord as $fieldName => $varValue) {
             $varValue = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'insert');
             $arrRecord[$fieldName] = \is_array($varValue) ? serialize($varValue) : $varValue;
+        }
+
+        if ($this->message->hasError()) {
+            return;
         }
 
         $objDataRecord->setData($arrRecord);
@@ -331,6 +384,10 @@ class Merger implements LoggerAwareInterface
                 $arrRecord[$fieldName] = \is_array($varValue) ? serialize($varValue) : $varValue;
             }
 
+            if ($this->message->hasError()) {
+                return;
+            }
+
             $objDataRecord->setData($arrRecord);
 
             $affected = (bool) $this->connection->update($this->importTable, $arrRecord, ['id' => $arrCurrent['id']]);
@@ -359,7 +416,7 @@ class Merger implements LoggerAwareInterface
                         $arrCurrent[$this->identifier],
                     )
                 );
-            }else{
+            } else {
                 $this->message->addInfo(
                     sprintf(
                         'Line #%d: Data record with identifier "%s.%s = %s" is already up to date.',
@@ -427,56 +484,6 @@ class Merger implements LoggerAwareInterface
             foreach ($GLOBALS['TL_HOOKS']['csvTableMergerPostUpdate'] as $callback) {
                 $objHook = $this->systemAdapter->importStatic($callback[0]);
                 $objHook->{$callback[1]}($importTable, $id);
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function deleteNonExistentRecords(): void
-    {
-        $arrIdentifiers = array_column($this->getRecordsFromCsv(), $this->identifier);
-
-        if (!empty($arrIdentifiers)) {
-            $arrDelIdentifiers = $this->connection->fetchFirstColumn(
-                sprintf(
-                    "SELECT id FROM %s WHERE %s NOT IN('%s')",
-                    $this->importTable,
-                    $this->identifier,
-                    implode("', '", $arrIdentifiers),
-                )
-            );
-
-            foreach ($arrDelIdentifiers as $intId) {
-                $valIdentifier = $this->connection->fetchOne(sprintf('SELECT %s FROM %s WHERE id = ?', $this->identifier, $this->importTable), [$intId]);
-                $affected = (bool) $this->connection->delete($this->importTable, ['id' => $intId]);
-
-                if ($affected) {
-                    $this->message->addInfo(
-                        sprintf(
-                            'Delete data record with "%s.id = %s" and identifier "%s.%s = %s"',
-                            $this->importTable,
-                            $intId,
-                            $this->importTable,
-                            $this->identifier,
-                            $valIdentifier,
-                        )
-                    );
-                }
-
-                // System log
-                if (null !== $this->logger) {
-                    $this->logger->log(
-                        LogLevel::INFO,
-                        sprintf(
-                            'DELETE FROM %s WHERE id=%d',
-                            $this->importTable,
-                            $intId,
-                        ),
-                        ['contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL)],
-                    );
-                }
             }
         }
     }

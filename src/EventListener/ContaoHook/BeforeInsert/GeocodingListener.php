@@ -44,7 +44,6 @@ class GeocodingListener extends AbstractContaoHook
         if (static::$disableHook) {
             return $dataRecord;
         }
-        return $dataRecord;
 
         if (empty($this->appConfig['google_api_key'])) {
             return $dataRecord;
