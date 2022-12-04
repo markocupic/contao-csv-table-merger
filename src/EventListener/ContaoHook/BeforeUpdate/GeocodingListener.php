@@ -48,6 +48,7 @@ class GeocodingListener extends AbstractContaoHook
         if (empty($this->appConfig['google_api_key'])) {
             return $dataRecord;
         }
+        return $dataRecord;
 
         $arrRecord = $dataRecord->getData();
 
@@ -74,16 +75,14 @@ class GeocodingListener extends AbstractContaoHook
                         $arrRecord['longitude'] = '';
                         $arrRecord['latitude'] = '';
                     }
-
                 }
             }
-        }else{
+        } else {
             $arrRecord['longitude'] = '';
             $arrRecord['latitude'] = '';
         }
 
         $dataRecord->setData($arrRecord);
-
 
         return $dataRecord;
     }

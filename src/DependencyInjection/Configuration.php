@@ -27,6 +27,9 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
+                ->integerNode('max_inserts_per_request')
+                    ->defaultValue(50)
+                ->end()
                 ->scalarNode('google_api_key')
                     ->defaultValue('')
                 ->end()

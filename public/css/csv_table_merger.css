@@ -17,13 +17,16 @@
 }
 .cctm-app .cctm-app-inner .cctm-summary-box p {
   line-height: 1.8;
-  margin-bottom: 0.4rem;
   font-size: 11px;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 0.4rem;
+  background: 0 !important;
 }
-.cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-error {
+.cctm-app .cctm-app-inner .cctm-summary-box .tl_error, .cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-error {
   color: #f88585;
 }
-.cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-info {
+.cctm-app .cctm-app-inner .cctm-summary-box .tl_info, .cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-info {
   color: greenyellow;
 }
 

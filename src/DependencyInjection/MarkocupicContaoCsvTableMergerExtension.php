@@ -50,6 +50,7 @@ class MarkocupicContaoCsvTableMergerExtension extends Extension
         $rootKey = $this->getAlias();
 
         $container->setParameter($rootKey, $config);
+        $container->setParameter($rootKey.'.max_inserts_per_request', $config['max_inserts_per_request']);
         $container->setParameter($rootKey.'.google_api_key', $config['google_api_key']);
         $container->setParameter($rootKey.'.fields_newer_update', $config['fields_newer_update']);
     }

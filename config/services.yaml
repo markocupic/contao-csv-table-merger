@@ -18,9 +18,11 @@ services:
     # Add a session bag
     Markocupic\ContaoCsvTableMerger\Session\Attribute\ArrayAttributeBag:
         arguments:
-            - _markocupic_contao_csv_table_merger_attributes
+            - '@request_stack'
+            -  !php/const "\\Markocupic\\ContaoCsvTableMerger\\Session\\Attribute\\ArrayAttributeBag::KEY"
         calls:
-            - [ setName, [ markocupic_contao_csv_table_merger ] ]
+            - [ setName, [ !php/const "\\Markocupic\\ContaoCsvTableMerger\\Session\\Attribute\\ArrayAttributeBag::NAME" ] ]
 
     Markocupic\ContaoCsvTableMerger\Controller\Backend\CsvTableMergeController:
         public: true
+

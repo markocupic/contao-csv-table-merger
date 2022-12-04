@@ -14,10 +14,8 @@ declare(strict_types=1);
 
 namespace Markocupic\ContaoCsvTableMerger\EventListener\ContaoHook\BeforeInsert;
 
-use Contao\BackendUser;
 use Contao\CoreBundle\ServiceAnnotation\Hook;
 use Contao\Database;
-use Contao\FrontendUser;
 use Markocupic\ContaoCsvTableMerger\DataRecord\DataRecord;
 use Markocupic\ContaoCsvTableMerger\EventListener\ContaoHook\AbstractContaoHook;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
@@ -70,6 +68,4 @@ class BeforeInsertListener extends AbstractContaoHook
 
         return $dataRecord;
     }
-
-
 }

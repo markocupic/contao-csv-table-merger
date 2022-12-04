@@ -107,6 +107,14 @@ class Message
     }
 
     /**
+     * Get confirmation messages.
+     */
+    public function getAll(): string
+    {
+        return \Contao\Message::generateUnwrapped();
+    }
+
+    /**
      * Get flash messages for the contao backend.
      */
     private function getFlashMessages(string $type): array

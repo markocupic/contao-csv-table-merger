@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 use Contao\DataContainer;
 use Contao\DC_Table;
+use Ramsey\Uuid\Uuid;
 
 $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
     'config'   => [
@@ -64,7 +65,7 @@ $GLOBALS['TL_DCA']['tl_csv_table_merger'] = [
                 'icon' => 'show.gif',
             ],
             'merge'  => [
-                'href'       => 'key=runMergingProcessAction',
+                'href'       => 'key=appAction&session_key='.Uuid::uuid4()->toString(),
                 'icon'       => 'bundles/markocupiccontaocsvtablemerger/icons/merge_16.svg',
                 'attributes' => 'onclick="if (!confirm(\''.($GLOBALS['TL_LANG']['CCTM_MSC']['mergeConfirm'] ?? null).'\')) return false; Backend.getScrollOffset();"',
             ],

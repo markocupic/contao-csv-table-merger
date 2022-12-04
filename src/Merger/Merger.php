@@ -74,25 +74,47 @@ class Merger implements LoggerAwareInterface
         $this->systemAdapter = $this->framework->getAdapter(System::class);
     }
 
-    /**
-     * @throws Exception
-     */
-    public function run(CsvTableMergerModel $model): void
+    public function validate(CsvTableMergerModel $model): bool
     {
         if (!$this->initialized) {
             $this->initialize($model);
         }
 
         if (!$this->validateSettings()) {
-            return;
+            return false;
         }
+
+        $this->message->addInfo('Validate settings: ok!');
 
         // Validate data and abort process in case of an invalid spreadsheet.
         if (!$this->validateSpreadsheet()) {
-            return;
+            return false;
         }
 
-        $line = 1;
+        $this->message->addInfo('Validate spreadsheet: ok!');
+
+        return true;
+    }
+
+    public function getRecordsCount(CsvTableMergerModel $model): int
+    {
+        if (!$this->initialized) {
+            $this->initialize($model);
+        }
+
+        return \count($this->getRecordsFromCsv());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function run(CsvTableMergerModel $model, int $offset = 0, int $limit = 0): void
+    {
+        if (!$this->initialized) {
+            $this->initialize($model);
+        }
+
+        $line = $offset + 1;
 
         /*
          * The database won't be touched if an error occurs!
@@ -100,7 +122,7 @@ class Merger implements LoggerAwareInterface
         $this->connection->beginTransaction();
 
         try {
-            foreach ($this->getRecordsFromCsv() as $arrRecord) {
+            foreach ($this->getRecordsFromCsv($offset, $limit) as $arrRecord) {
                 ++$line;
 
                 $result = $this->connection->fetchAssociative(
@@ -126,9 +148,8 @@ class Merger implements LoggerAwareInterface
             // Do not update/insert if there was an error!
             if ($this->message->hasError()) {
                 $this->connection->rollBack();
-            } else {
-                $this->connection->commit();
             }
+            $this->connection->commit();
         } catch (\Exception $e) {
             $this->connection->rollBack();
 
@@ -158,19 +179,28 @@ class Merger implements LoggerAwareInterface
      * @throws \League\Csv\Exception
      * @throws InvalidArgument
      */
-    private function getRecordsFromCsv(): array
+    private function getRecordsFromCsv(int $offset = 0, int $limit = 0): array
     {
-        if (\is_array($this->records)) {
-            return $this->records;
+        if (isset($this->records[$offset.'_'.$limit]) && \is_array($this->records[$offset.'_'.$limit])) {
+            return $this->records[$offset.'_'.$limit];
         }
 
         $csv = Reader::createFromPath($this->source, 'r');
 
         $csv->setHeaderOffset(0);
+        $csv->skipInputBOM();
         $csv->setDelimiter($this->delimiter);
         $csv->setEnclosure($this->enclosure);
 
         $stmt = Statement::create();
+
+        if ($offset) {
+            $stmt = $stmt->offset($offset);
+        }
+
+        if ($limit) {
+            $stmt = $stmt->limit($limit);
+        }
 
         $arrData = $stmt->process($csv);
 
@@ -180,7 +210,7 @@ class Merger implements LoggerAwareInterface
             $arrRecords[] = array_map('trim', $arrRecord);
         }
 
-        $this->records = $arrRecords;
+        $this->records[$offset.'_'.$limit] = $arrRecords;
 
         return $arrRecords;
     }
@@ -191,7 +221,6 @@ class Merger implements LoggerAwareInterface
     private function insertRecord(DataRecord $objDataRecord): void
     {
         $arrRecord = $objDataRecord->getData();
-
         // Do only allow inserting selected fields.
         foreach (array_keys($arrRecord) as $fieldName) {
             if (!\in_array($fieldName, $this->allowedFields, true)) {
@@ -255,6 +284,8 @@ class Merger implements LoggerAwareInterface
                     $arrRecord[$this->identifier]
                 )
             );
+
+            return;
         }
     }
 
@@ -322,6 +353,16 @@ class Merger implements LoggerAwareInterface
                 $this->message->addInfo(
                     sprintf(
                         'Line #%d: Update data record with identifier "%s.%s = %s".',
+                        $objDataRecord->getCurrentLine(),
+                        $this->importTable,
+                        $this->identifier,
+                        $arrCurrent[$this->identifier],
+                    )
+                );
+            }else{
+                $this->message->addInfo(
+                    sprintf(
+                        'Line #%d: Data record with identifier "%s.%s = %s" is already up to date.',
                         $objDataRecord->getCurrentLine(),
                         $this->importTable,
                         $this->identifier,
@@ -497,6 +538,21 @@ class Merger implements LoggerAwareInterface
         foreach ($arrRecords as $arrRecord) {
             ++$line;
 
+            if (!isset($arrRecord[$this->identifier])) {
+                $hasError = true;
+                $this->message->addError(
+                    sprintf(
+                        'Line #%d: Table merge process aborted! You selected column "%s" as identifier. But we could not detect a column with the name "%s"! Please check the spreadsheet on line #%d.',
+                        $line,
+                        $this->identifier,
+                        $this->identifier,
+                        $line,
+                    )
+                );
+
+                return false;
+            }
+
             if (!\strlen($arrRecord[$this->identifier])) {
                 $hasError = true;
                 $this->message->addError(
@@ -506,6 +562,8 @@ class Merger implements LoggerAwareInterface
                         $line,
                     )
                 );
+
+                return false;
             }
         }
 

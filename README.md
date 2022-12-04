@@ -33,3 +33,7 @@ Annina;Meile;1878-05-29;female;Webdesign AG;Nashornstrasse 2;6208;Oberkirch;Kant
 
 ### Zeilenumbrüche
 Alle [NEWLINE] tags in der CSV Datei werden beim Import-Vorgang in \r\n bzw. \n umgewandelt.
+
+
+### Danksagung!
+Grossen Dank an https://www.mockaroo.com/
