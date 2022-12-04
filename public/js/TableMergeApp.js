@@ -12,15 +12,14 @@ class TableMergeApp {
 
         const options = {...defaults, ...opt};
 
-        //const {createApp} = Vue
+        const {createApp} = Vue
 
-        const app = Vue.createApp({
-            //delimiters: ['[[ ', ' ]]'],
-            //delimiters: ['${', '}'],
+        const app = createApp({
 
             data() {
                 return {
                     messages: '<p class="tl_info">Initializaton started. Please wait...</p>',
+                    perc_loaded: 0,
                     initialization_succeed: false,
                     record_count: -1,
                     requests_required: -1,
@@ -96,13 +95,13 @@ class TableMergeApp {
                     const bar = document.getElementById('importProgress');
                     const percentage = document.querySelector('#importProgress .cctm-percentage');
                     if (bar && this.requests_required > 0) {
-                        let perc = Math.ceil(this.requests_completed / this.requests_required * 100);
+                        this.perc_loaded = Math.ceil(this.requests_completed / this.requests_required * 100);
                         if (this.requests_pending === 0) {
-                            let perc = 100;
+                            this.perc_loaded = 100;
                         }
-                        bar.style.width = perc + '%';
-                        if (percentage) {
-                            percentage.innerHTML = perc + ' %';
+                        bar.style.width = this.perc_loaded + '%';
+                        if (percentage && this.perc_loaded > 8) {
+                            percentage.innerHTML = this.perc_loaded + '%';
                         }
                     }
                 }
