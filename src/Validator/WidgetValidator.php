@@ -25,7 +25,7 @@ use Contao\Widget;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Markocupic\ContaoCsvTableMerger\Formatter\Formatter;
-use Markocupic\ContaoCsvTableMerger\Message\Message;
+use Markocupic\ContaoCsvTableMerger\Merger\MergeMonitor;
 use Markocupic\ContaoCsvTableMerger\Model\CsvTableMergerModel;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -38,31 +38,32 @@ class WidgetValidator
     private RequestStack $requestStack;
     private TranslatorInterface $translator;
     private Formatter $formatter;
-    private Message $message;
 
     private Adapter $controllerAdapter;
     private Adapter $inputAdapter;
     private Adapter $stringUtilAdapter;
+    private Adapter $validatorAdapter;
 
-    public function __construct(ContaoFramework $framework, Connection $connection, RequestStack $requestStack, TranslatorInterface $translator, Formatter $formatter, Message $message)
+    public function __construct(ContaoFramework $framework, Connection $connection, RequestStack $requestStack, TranslatorInterface $translator, Formatter $formatter)
     {
         $this->framework = $framework;
         $this->connection = $connection;
         $this->requestStack = $requestStack;
         $this->translator = $translator;
         $this->formatter = $formatter;
-        $this->message = $message;
 
         // Adapters
         $this->controllerAdapter = $this->framework->getAdapter(Controller::class);
         $this->inputAdapter = $this->framework->getAdapter(Input::class);
         $this->stringUtilAdapter = $this->framework->getAdapter(StringUtil::class);
+        $this->validatorAdapter = $this->framework->getAdapter(Validator::class);
+
     }
 
     /**
      * @return array|mixed|string|array<string>
      */
-    public function validate(string $fieldName, string $tableName, $varValue, CsvTableMergerModel $model, int $line, string $mode = 'insert')
+    public function validate(string $fieldName, string $tableName, $varValue, CsvTableMergerModel $model, MergeMonitor $mergeMonitor, int $line, string $mode = 'insert')
     {
         // Set $_POST, so the content can be validated
         $request = $this->requestStack->getCurrentRequest();
@@ -115,7 +116,7 @@ class WidgetValidator
 
         if ($widget->hasErrors()) {
             foreach ($widget->getErrors() as $error) {
-                $this->message->addError(sprintf('Line #%d "%s" => "%s": ', $line, $widget->strField, \is_array($widget->value) ? json_encode($widget->value) : (string) $widget->value).$error);
+                $mergeMonitor->addErrorMessage(sprintf('Line #%d "%s" => "%s": ', $line, $widget->strField, \is_array($widget->value) ? json_encode($widget->value) : (string) $widget->value).$error);
             }
         }
 
@@ -172,10 +173,8 @@ class WidgetValidator
             return $widget;
         }
 
-        $validatorAdapter = $this->framework->getAdapter(Validator::class);
-
         if ('date' === $rgxp || 'datim' === $rgxp || 'time' === $rgxp) {
-            if (!$validatorAdapter->{'is'.ucfirst($rgxp)}($varValue)) {
+            if (!$this->validatorAdapter->{'is'.ucfirst($rgxp)}($varValue)) {
                 $widget->addError(
                     $this->translator->trans('ERR.invalidDate', [], 'contao_default'),
                 );

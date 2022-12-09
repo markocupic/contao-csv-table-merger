@@ -13,7 +13,11 @@
                 <span>Requests required: [[ requests_required ]]</span>
                 <span>Requests pending: [[ requests_pending ]]</span>
                 <span>Requests completed: [[ requests_completed ]]</span>
+                <span>Count updates: [[ count_updates ]]</span>
+                <span>Count inserts: [[ count_inserts ]]</span>
+                <span>Count deletions: [[ count_deletions ]]</span>
             </div>
+
             <div v-if="merging_process_stopped_with_error" class="cctm-status-box cctm-merging-process-stopped-with-error cctm-status-error">
                 <p>Merging process stopped with an error. Please check your system log.</p>
             </div>
@@ -30,7 +34,10 @@
                 </div>
             </div>
 
-            <div class="cctm-summary-box" v-html="messages"></div>
+            <div class="cctm-summary-box">
+                <p class="tl_info" data-request="">Initializaton started. Please wait...</p>
+                <p v-for="message in messages" v-bind:class="'tl_' + message.type" v-bind:data-request="message.request">[[ message.message ]]</p>
+            </div>
 
         </div>
     </div>

@@ -28,7 +28,6 @@ use League\Csv\InvalidArgument;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use Markocupic\ContaoCsvTableMerger\DataRecord\DataRecord;
-use Markocupic\ContaoCsvTableMerger\Message\Message;
 use Markocupic\ContaoCsvTableMerger\Model\CsvTableMergerModel;
 use Markocupic\ContaoCsvTableMerger\Validator\WidgetValidator;
 use Psr\Log\LoggerAwareInterface;
@@ -42,7 +41,6 @@ class Merger implements LoggerAwareInterface
     private ContaoFramework $framework;
     private Connection $connection;
     private WidgetValidator $widgetValidator;
-    private Message $message;
     private array $appConfig;
     private string $projectDir;
     private Adapter $stringUtilAdapter;
@@ -59,12 +57,11 @@ class Merger implements LoggerAwareInterface
     private string $enclosure = '"';
     private ?string $source = null;
 
-    public function __construct(ContaoFramework $framework, Connection $connection, WidgetValidator $widgetValidator, Message $message, array $appConfig, string $projectDir)
+    public function __construct(ContaoFramework $framework, Connection $connection, WidgetValidator $widgetValidator, array $appConfig, string $projectDir)
     {
         $this->framework = $framework;
         $this->connection = $connection;
         $this->widgetValidator = $widgetValidator;
-        $this->message = $message;
         $this->appConfig = $appConfig;
         $this->projectDir = $projectDir;
 
@@ -74,30 +71,34 @@ class Merger implements LoggerAwareInterface
         $this->systemAdapter = $this->framework->getAdapter(System::class);
     }
 
-    public function validate(CsvTableMergerModel $model): bool
+    public function validate(MergeMonitor $mergeMonitor): bool
     {
+        $model = $mergeMonitor->getModel();
+
         if (!$this->initialized) {
             $this->initialize($model);
         }
 
-        if (!$this->validateSettings()) {
+        if (!$this->validateSettings($mergeMonitor)) {
             return false;
         }
 
-        $this->message->addInfo('Validate settings: ok!');
+        $mergeMonitor->addInfoMessage('Validate settings: ok!');
 
         // Validate data and abort process in case of an invalid spreadsheet.
-        if (!$this->validateSpreadsheet()) {
+        if (!$this->validateSpreadsheet($mergeMonitor)) {
             return false;
         }
 
-        $this->message->addInfo('Validate spreadsheet: ok!');
+        $mergeMonitor->addInfoMessage('Validate spreadsheet: ok!');
 
         return true;
     }
 
-    public function getRecordsCount(CsvTableMergerModel $model): int
+    public function getRecordsCount(MergeMonitor $mergeMonitor): int
     {
+        $model = $mergeMonitor->getModel();
+
         if (!$this->initialized) {
             $this->initialize($model);
         }
@@ -108,8 +109,10 @@ class Merger implements LoggerAwareInterface
     /**
      * @throws Exception
      */
-    public function run(CsvTableMergerModel $model, int $offset = 0, int $limit = 0): void
+    public function run(MergeMonitor $mergeMonitor, int $offset = 0, int $limit = 0): void
     {
+        $model = $mergeMonitor->getModel();
+
         if (!$this->initialized) {
             $this->initialize($model);
         }
@@ -133,15 +136,15 @@ class Merger implements LoggerAwareInterface
                 $objDataRecord = new DataRecord($arrRecord, $this->model, $line);
 
                 if (!$result) {
-                    $this->insertRecord($objDataRecord);
+                    $this->insertRecord($objDataRecord, $mergeMonitor);
                 } else {
                     $objDataRecord->setTargetRecord($result);
-                    $this->updateRecord($objDataRecord);
+                    $this->updateRecord($objDataRecord, $mergeMonitor);
                 }
             }
 
             // Do not update/insert if there was an error!
-            if ($this->message->hasError()) {
+            if ($mergeMonitor->hasErrorMessage()) {
                 $this->connection->rollBack();
             }
             $this->connection->commit();
@@ -155,8 +158,10 @@ class Merger implements LoggerAwareInterface
     /**
      * @throws Exception
      */
-    public function deleteNonExistentRecords(CsvTableMergerModel $model): void
+    public function deleteNonExistentRecords(MergeMonitor $mergeMonitor): void
     {
+        $model = $mergeMonitor->getModel();
+
         $this->initialize($model);
 
         $arrIdentifiers = array_column($this->getRecordsFromCsv(), $this->identifier);
@@ -176,7 +181,7 @@ class Merger implements LoggerAwareInterface
                 $affected = (bool) $this->connection->delete($this->importTable, ['id' => $intId]);
 
                 if ($affected) {
-                    $this->message->addInfo(
+                    $mergeMonitor->addInfoMessage(
                         sprintf(
                             'Delete data record with "%s.id = %s" and identifier "%s.%s = %s"',
                             $this->importTable,
@@ -186,19 +191,23 @@ class Merger implements LoggerAwareInterface
                             $valIdentifier,
                         )
                     );
-                }
 
-                // System log
-                if (null !== $this->logger) {
-                    $this->logger->log(
-                        LogLevel::INFO,
-                        sprintf(
-                            'DELETE FROM %s WHERE id=%d',
-                            $this->importTable,
-                            $intId,
-                        ),
-                        ['contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL)],
-                    );
+                    $countDeletions = $mergeMonitor->get(MergeMonitor::KEY_COUNT_DELETIONS);
+                    $countDeletions++;
+                    $mergeMonitor->set(MergeMonitor::KEY_COUNT_DELETIONS, $countDeletions);
+
+                    // System log
+                    if (null !== $this->logger) {
+                        $this->logger->log(
+                            LogLevel::INFO,
+                            sprintf(
+                                'DELETE FROM %s WHERE id=%d',
+                                $this->importTable,
+                                $intId,
+                            ),
+                            ['contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL)],
+                        );
+                    }
                 }
             }
         }
@@ -258,7 +267,7 @@ class Merger implements LoggerAwareInterface
             $arrRecords[] = array_map('trim', $arrRecord);
         }
 
-        // Cache resultss
+        // Cache results
         $this->records[$offset.'_'.$limit] = $arrRecords;
 
         return $arrRecords;
@@ -267,7 +276,7 @@ class Merger implements LoggerAwareInterface
     /**
      * @throws Exception
      */
-    private function insertRecord(DataRecord $objDataRecord): void
+    private function insertRecord(DataRecord $objDataRecord, MergeMonitor $mergeMonitor): void
     {
         $arrRecord = $objDataRecord->getData();
         // Do only allow inserting selected fields.
@@ -285,17 +294,17 @@ class Merger implements LoggerAwareInterface
         $arrRecord = $objDataRecord->getData();
 
         foreach ($arrRecord as $fieldName => $varValue) {
-            $varValue = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'insert');
+            $varValue = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $mergeMonitor, $objDataRecord->getCurrentLine(), 'insert');
             $arrRecord[$fieldName] = \is_array($varValue) ? serialize($varValue) : $varValue;
         }
 
-        if ($this->message->hasError()) {
+        if ($mergeMonitor->hasErrorMessage()) {
             return;
         }
 
         $objDataRecord->setData($arrRecord);
 
-        if (!$this->message->hasError() && $objDataRecord->getStoreData()) {
+        if ($objDataRecord->getStoreData()) {
             $affected = (bool) $this->connection->insert($this->importTable, $arrRecord);
 
             if ($affected) {
@@ -303,7 +312,7 @@ class Merger implements LoggerAwareInterface
 
                 $this->triggerPostInsertHook($this->importTable, $insertId);
 
-                $this->message->addInfo(
+                $mergeMonitor->addInfoMessage(
                     sprintf(
                         'Line #%d: Insert new data record with ID %d and identifier "%s.%s =  %s".',
                         $objDataRecord->getCurrentLine(),
@@ -313,6 +322,10 @@ class Merger implements LoggerAwareInterface
                         $arrRecord[$this->identifier]
                     )
                 );
+
+                $countInserts = $mergeMonitor->get(MergeMonitor::KEY_COUNT_INSERTS);
+                $countInserts++;
+                $mergeMonitor->set(MergeMonitor::KEY_COUNT_INSERTS, $countInserts);
 
                 // System log
                 if (null !== $this->logger) {
@@ -327,25 +340,13 @@ class Merger implements LoggerAwareInterface
                     );
                 }
             }
-        } else {
-            $this->message->addInfo(
-                sprintf(
-                    'Line #%d: Skipped database insert for data record with identifier "%s.%s = %s".',
-                    $objDataRecord->getCurrentLine(),
-                    $this->importTable,
-                    $this->identifier,
-                    $arrRecord[$this->identifier]
-                )
-            );
-
-            return;
         }
     }
 
     /**
      * @throws Exception
      */
-    private function updateRecord(DataRecord $objDataRecord): void
+    private function updateRecord(DataRecord $objDataRecord, MergeMonitor $mergeMonitor): void
     {
         $arrRecord = $objDataRecord->getData();
 
@@ -372,7 +373,7 @@ class Merger implements LoggerAwareInterface
 
         $objDataRecord = $this->triggerBeforeUpdateHook($objDataRecord);
 
-        if (!$this->message->hasError() && $objDataRecord->getStoreData()) {
+        if (!$mergeMonitor->hasErrorMessage() && $objDataRecord->getStoreData()) {
             // New state
             $arrRecord = $objDataRecord->getData();
 
@@ -380,11 +381,11 @@ class Merger implements LoggerAwareInterface
             $arrCurrent = $objDataRecord->getTargetRecord();
 
             foreach ($arrRecord as $fieldName => $varValue) {
-                $varValue = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $objDataRecord->getCurrentLine(), 'update');
+                $varValue = $this->widgetValidator->validate($fieldName, $this->importTable, $varValue, $this->model, $mergeMonitor, $objDataRecord->getCurrentLine(), 'update');
                 $arrRecord[$fieldName] = \is_array($varValue) ? serialize($varValue) : $varValue;
             }
 
-            if ($this->message->hasError()) {
+            if ($mergeMonitor->hasErrorMessage()) {
                 return;
             }
 
@@ -407,7 +408,11 @@ class Merger implements LoggerAwareInterface
                 $objVersions->initialize();
                 $objVersions->create();
 
-                $this->message->addInfo(
+                $countUpdates = $mergeMonitor->get(MergeMonitor::KEY_COUNT_UPDATES);
+                $countUpdates++;
+                $mergeMonitor->set(MergeMonitor::KEY_COUNT_UPDATES, $countUpdates);
+
+                $mergeMonitor->addInfoMessage(
                     sprintf(
                         'Line #%d: Update data record with identifier "%s.%s = %s".',
                         $objDataRecord->getCurrentLine(),
@@ -417,7 +422,7 @@ class Merger implements LoggerAwareInterface
                     )
                 );
             } else {
-                $this->message->addInfo(
+                $mergeMonitor->addInfoMessage(
                     sprintf(
                         'Line #%d: Data record with identifier "%s.%s = %s" is already up to date.',
                         $objDataRecord->getCurrentLine(),
@@ -428,7 +433,7 @@ class Merger implements LoggerAwareInterface
                 );
             }
         } else {
-            $this->message->addInfo(
+            $mergeMonitor->addInfoMessage(
                 sprintf(
                     'Line #%d: Skipped data record update for data record with identifier "%s.%s = %s".',
                     $objDataRecord->getCurrentLine(),
@@ -488,11 +493,11 @@ class Merger implements LoggerAwareInterface
         }
     }
 
-    private function validateSettings(): bool
+    private function validateSettings(MergeMonitor $mergeMonitor): bool
     {
         // Check #1: Check if table exists.
         if (!Database::getInstance()->tableExists($this->importTable)) {
-            $this->message->addError(
+            $mergeMonitor->addErrorMessage(
                 sprintf(
                     'Table merge process aborted! Table "%s" does not exist. Please check the settings.',
                     $this->importTable,
@@ -505,7 +510,7 @@ class Merger implements LoggerAwareInterface
         // Check #2: Check if each of the selected fields exists in the table
         foreach ($this->allowedFields as $fieldName) {
             if (!Database::getInstance()->fieldExists($fieldName, $this->importTable)) {
-                $this->message->addError(
+                $mergeMonitor->addErrorMessage(
                     sprintf(
                         'Table merge process aborted! Field name "%s" does not exist in table "%s".  Please check "allowed fields" in the settings.',
                         $fieldName,
@@ -525,13 +530,13 @@ class Merger implements LoggerAwareInterface
      * @throws InvalidArgument
      * @throws \League\Csv\Exception
      */
-    private function validateSpreadsheet(): bool
+    private function validateSpreadsheet(MergeMonitor $mergeMonitor): bool
     {
         $arrRecords = $this->getRecordsFromCsv();
 
         // Check #0: Check, if has been defined.
         if (!\strlen($this->identifier)) {
-            $this->message->addError(
+            $mergeMonitor->addErrorMessage(
                 'Table merge process aborted! You have to define an identifier.'
             );
 
@@ -539,15 +544,13 @@ class Merger implements LoggerAwareInterface
         }
 
         // Check #1: Check, if each record contains an identifier.
-        $hasError = false;
         $line = 1; // headline: line #1
 
         foreach ($arrRecords as $arrRecord) {
             ++$line;
 
             if (!isset($arrRecord[$this->identifier])) {
-                $hasError = true;
-                $this->message->addError(
+                $mergeMonitor->addErrorMessage(
                     sprintf(
                         'Line #%d: Table merge process aborted! You selected column "%s" as identifier. But we could not detect a column with the name "%s"! Please check the spreadsheet on line #%d.',
                         $line,
@@ -561,8 +564,7 @@ class Merger implements LoggerAwareInterface
             }
 
             if (!\strlen($arrRecord[$this->identifier])) {
-                $hasError = true;
-                $this->message->addError(
+                $mergeMonitor->addErrorMessage(
                     sprintf(
                         'Line #%d: Table merge process aborted! No identifier found! Please check the spreadsheet on line #%d.',
                         $line,
@@ -574,16 +576,12 @@ class Merger implements LoggerAwareInterface
             }
         }
 
-        if ($hasError) {
-            return false;
-        }
-
         // Check #2: Check, if identifier is unique.
         $arrIdentifier = array_column($arrRecords, $this->identifier);
         $arrIdentifierFiltered = array_filter(array_unique(array_column($arrRecords, $this->identifier)));
 
         if (\count($arrIdentifier) !== \count($arrIdentifierFiltered)) {
-            $this->message->addError(
+            $mergeMonitor->addErrorMessage(
                 sprintf(
                     'Table merge process aborted! Identifier "%s.%s" has to be unique, but "%s" found two or more times in the spreadsheet. Please check the spreadsheet or select another field for the identifier.',
                     $this->importTable,
@@ -613,7 +611,7 @@ class Merger implements LoggerAwareInterface
 
             if ($counter > 1) {
                 $hasError = true;
-                $this->message->addError(
+                $mergeMonitor->addErrorMessage(
                     sprintf(
                         'Table merge process aborted! Identifier "%s.%s" with value "%s" has to be unique, but found multiple times in "%s". Please fix the database or select another field for the identifier.',
                         $this->importTable,

@@ -18,7 +18,7 @@ class TableMergeApp {
 
             data() {
                 return {
-                    messages: '<p class="tl_info">Initializaton started. Please wait...</p>',
+                    messages: [],
                     perc_loaded: 0,
                     initialization_succeed: false,
                     record_count: -1,
@@ -27,6 +27,9 @@ class TableMergeApp {
                     requests_completed: -1,
                     merging_process_stopped_with_error: false,
                     merging_process_completed: false,
+                    count_inserts: 0,
+                    count_updates: 0,
+                    count_deletions: 0,
                 }
             },
 
@@ -47,7 +50,7 @@ class TableMergeApp {
                         .then((data) => {
                             if (data.success === true) {
                                 this.initialization_succeed = true;
-                                this.messages = this.messages + data.messages;
+                                this.messages = [...this.messages, ...data.messages];
                                 this.record_count = data.record_count;
                                 this.requests_required = data.requests_required;
                                 this.requests_pending = data.requests_pending;
@@ -68,7 +71,10 @@ class TableMergeApp {
                         .then((response) => response.json())
                         .then((data) => {
                             if (data.success === true) {
-                                this.messages = this.messages + data.messages;
+                                this.messages = [...this.messages, ...data.messages];
+                                this.count_inserts = data.count_inserts;
+                                this.count_updates = data.count_updates;
+                                this.count_deletions = data.count_deletions;
                                 this.requests_pending = data.requests_pending;
                                 this.requests_completed = data.requests_completed;
 
@@ -80,8 +86,11 @@ class TableMergeApp {
                                     this.updateProgressBar();
                                 }
                             } else {
-                                if (data.messages) {
-                                    this.messages = this.messages + data.messages;
+                                if (data) {
+                                    this.messages = [...this.messages, ...data.messages];
+                                    this.count_inserts = data.count_inserts;
+                                    this.count_updates = data.count_updates;
+                                    this.count_deletions = data.count_deletions;
                                 }
                                 this.updateProgressBar();
                                 this.merging_process_stopped_with_error = true;

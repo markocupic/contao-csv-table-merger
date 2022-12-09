@@ -13,12 +13,11 @@ services:
 
     Markocupic\ContaoCsvTableMerger\:
         resource: ../src/
-        exclude: ../src/{DataRecord,DependencyInjection,Model}
+        exclude: [../src/{DataRecord,DependencyInjection,Model}, ../src/Merger/MergeMonitor]
 
     # Add a session bag
     Markocupic\ContaoCsvTableMerger\Session\Attribute\ArrayAttributeBag:
         arguments:
-            - '@request_stack'
             -  !php/const "\\Markocupic\\ContaoCsvTableMerger\\Session\\Attribute\\ArrayAttributeBag::KEY"
         calls:
             - [ setName, [ !php/const "\\Markocupic\\ContaoCsvTableMerger\\Session\\Attribute\\ArrayAttributeBag::NAME" ] ]
