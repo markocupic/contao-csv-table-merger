@@ -27,6 +27,7 @@ $GLOBALS['TL_LANG']['tl_csv_table_merger']['copy'] = "Datensatz mit ID: %s kopie
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['delete'] = "Datensatz mit ID: %s löschen";
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['show'] = "Datensatz mit ID: %s ansehen";
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['merge'] = "Merging mit ID: %s starten";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['appAction'] = ["Textdatei mit Tabelle zusammenführen", "Textdatei mit Tabelle zusammenführen"];
 
 /**
  * Fields

@@ -26,7 +26,7 @@ $GLOBALS['TL_LANG']['tl_csv_table_merger']['edit'] = "Edit record with ID: %s";
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['copy'] = "Copy record with ID: %s";
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['delete'] = "Delete record with ID: %s";
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['show'] = "Show record with ID: %s";
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['merge'] = "Start merging process with ID: %s";
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['appAction'] = ["Run merging process", "Run merging process"];
 
 /**
  * Fields
