@@ -3,7 +3,7 @@
         <a href="contao?do=csv_table_merger" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()">{{ 'MSC.goBack'|trans({}, 'contao_default') }}</a>
     </div>
 
-    <div id="vueApplication" class="tl_listing_container list_view cctm-app-inner">
+    <div id="cctmVueApp" class="tl_listing_container list_view cctm-app-inner">
         <div v-cloak>
 
             <h2>{{ model.title }}</h2>
@@ -29,12 +29,12 @@
             </div>
 
             <div class="cctm-progress-bar-container">
-                <div id="importProgress" class="cctm-progress-bar-inner">
+                <div id="cctmImportProgress" class="cctm-progress-bar-inner">
                     <span class="cctm-percentage"></span>
                 </div>
             </div>
 
-            <div class="cctm-summary-box">
+            <div id="cctmSummaryBox" class="cctm-summary-box">
                 <p class="tl_info" data-request="">Initializaton started. Please wait...</p>
                 <p v-for="message in messages" v-bind:class="'tl_' + message.type" v-bind:data-request="message.request">[[ message.message ]]</p>
             </div>
@@ -51,6 +51,6 @@
 
 <script>
     window.addEventListener('DOMContentLoaded', (event) => {
-        const tableMergerApplication = new TableMergeApp('#vueApplication', {{ options|json_encode()|raw }});
+        const tableMergerApplication = new TableMergeApp('#cctmVueApp', {{ options|json_encode()|raw }});
     });
 </script>

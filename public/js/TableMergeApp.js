@@ -32,6 +32,13 @@ class TableMergeApp {
                     count_deletions: 0,
                 }
             },
+            watch: {
+                // Auto scroll to bottom, if there are new messages
+                messages(newMessages, oldMessages) {
+                    const box = document.getElementById("cctmSummaryBox");
+                    window.setTimeout(() => box.scrollTop = box.scrollHeight + 100, 100);
+                }
+            },
 
             // Lifecycle hooks are called at different stages
             // of a component's lifecycle.
@@ -101,8 +108,8 @@ class TableMergeApp {
                 },
 
                 updateProgressBar: function updateProgressBar() {
-                    const bar = document.getElementById('importProgress');
-                    const percentage = document.querySelector('#importProgress .cctm-percentage');
+                    const bar = document.getElementById('cctmImportProgress');
+                    const percentage = document.querySelector('#cctmImportProgress .cctm-percentage');
                     if (bar && this.requests_required > 0) {
                         this.perc_loaded = Math.ceil(this.requests_completed / this.requests_required * 100);
                         if (this.requests_pending === 0) {

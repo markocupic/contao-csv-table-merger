@@ -45,8 +45,9 @@
     .cctm-summary-box {
       background-color: #0a0a0a;
       padding: 1rem;
-      display: block;
-      max-height: 400px;
+      display: flex;
+      flex-direction: column;
+      height: 400px;
       overflow-y: scroll;
 
       p {
@@ -56,6 +57,10 @@
         margin: 0;
         margin-bottom: 0.4rem;
         background: 0 !important;
+
+        &:last-child {
+          margin-bottom: 1.5rem !important;
+        }
       }
 
       .tl_error, .cctm-summary-box-item-error {
