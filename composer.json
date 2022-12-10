@@ -54,5 +54,5 @@
   "extra": {
     "contao-manager-plugin": "Markocupic\\ContaoCsvTableMerger\\ContaoManager\\Plugin"
   },
-  "version": "2.0.1"
+  "version": "2.0.2" 
 }
