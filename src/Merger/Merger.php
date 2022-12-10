@@ -143,13 +143,24 @@ class Merger implements LoggerAwareInterface
                 }
             }
 
-            // Do not update/insert if there was an error!
+            // Do not update nor insert records if there has been an error!
             if ($mergeMonitor->hasErrorMessage()) {
-                $this->connection->rollBack();
+                if ($this->connection->isTransactionActive()) {
+                    $this->connection->rollBack();
+
+                    return;
+                }
             }
             $this->connection->commit();
         } catch (\Exception $e) {
-            $this->connection->rollBack();
+            // Do not update nor insert records if there has been an error!
+            if ($mergeMonitor->hasErrorMessage()) {
+                if ($this->connection->isTransactionActive()) {
+                    $this->connection->rollBack();
+
+                    return;
+                }
+            }
 
             throw $e;
         }
@@ -193,7 +204,7 @@ class Merger implements LoggerAwareInterface
                     );
 
                     $countDeletions = $mergeMonitor->get(MergeMonitor::KEY_COUNT_DELETIONS);
-                    $countDeletions++;
+                    ++$countDeletions;
                     $mergeMonitor->set(MergeMonitor::KEY_COUNT_DELETIONS, $countDeletions);
 
                     // System log
@@ -324,7 +335,7 @@ class Merger implements LoggerAwareInterface
                 );
 
                 $countInserts = $mergeMonitor->get(MergeMonitor::KEY_COUNT_INSERTS);
-                $countInserts++;
+                ++$countInserts;
                 $mergeMonitor->set(MergeMonitor::KEY_COUNT_INSERTS, $countInserts);
 
                 // System log
@@ -409,7 +420,7 @@ class Merger implements LoggerAwareInterface
                 $objVersions->create();
 
                 $countUpdates = $mergeMonitor->get(MergeMonitor::KEY_COUNT_UPDATES);
-                $countUpdates++;
+                ++$countUpdates;
                 $mergeMonitor->set(MergeMonitor::KEY_COUNT_UPDATES, $countUpdates);
 
                 $mergeMonitor->addInfoMessage(
