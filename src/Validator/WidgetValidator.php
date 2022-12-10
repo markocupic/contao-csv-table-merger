@@ -57,7 +57,6 @@ class WidgetValidator
         $this->inputAdapter = $this->framework->getAdapter(Input::class);
         $this->stringUtilAdapter = $this->framework->getAdapter(StringUtil::class);
         $this->validatorAdapter = $this->framework->getAdapter(Validator::class);
-
     }
 
     /**

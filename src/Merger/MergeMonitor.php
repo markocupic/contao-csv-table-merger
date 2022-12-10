@@ -24,10 +24,11 @@ use Symfony\Component\HttpFoundation\Session\SessionBagInterface;
  * This class acts as an intermediate layer between the application
  * and the session.
  *
- * The session key is generated in the list view of the merging module in the Contao backend
- * and added as GET parameter to the "start merging process" href.
+ * The session key is generated on the server side,
+ * when the application is called and then sent as a parameter with each Ajax call.
  *
- * All error- and info messages are stored in the session under the key "$session_key".
+ * All data required for the progress indicator,
+ * all error- and info messages are stored in the session under the key "$session_key".
  * This is why the session key has to be transmitted with every ajax request.
  */
 class MergeMonitor

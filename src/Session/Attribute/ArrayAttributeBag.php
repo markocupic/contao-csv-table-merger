@@ -26,7 +26,6 @@ class ArrayAttributeBag extends AttributeBag implements \ArrayAccess
     public const KEY = '_markocupic_contao_csv_table_merger_attributes';
     public const NAME = 'markocupic_contao_csv_table_merger';
 
-
     /**
      * @param mixed $offset
      */

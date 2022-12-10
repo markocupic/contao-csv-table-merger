@@ -23,6 +23,7 @@ use Markocupic\ContaoCsvTableMerger\Controller\Ajax\VueAppController;
 use Markocupic\ContaoCsvTableMerger\Merger\MergeMonitorProvider;
 use Markocupic\ContaoCsvTableMerger\Merger\Merger;
 use Markocupic\ContaoCsvTableMerger\Model\CsvTableMergerModel;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -80,13 +81,6 @@ class CsvTableMergeController
      */
     public function appAction(DataContainer $dc): Response
     {
-        // Get the session key from $_GET
-        $sessionKey = $this->requestStack->getCurrentRequest()->get('session_key');
-
-        if (!$sessionKey) {
-            throw new \Exception('No session key provided.');
-        }
-
         $csvTableMergerAdapter = $this->framework->getAdapter(CsvTableMergerModel::class);
         $model = $csvTableMergerAdapter->findByPk($dc->id);
 
@@ -95,6 +89,7 @@ class CsvTableMergeController
         }
 
         // Create new MergeMonitor object
+        $sessionKey = Uuid::uuid4()->toString();
         $this->mergeMonitorProvider->createNew($model, $sessionKey);
 
         return new Response($this->twig->render(
