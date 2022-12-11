@@ -81,8 +81,8 @@ class VueAppController extends AbstractController
             // Count records
             $recordCount = $this->merger->getRecordsCount($mergeMonitor);
             $mergeMonitor->addInfoMessage('Count records: '.$recordCount);
-            $json[MergeMonitor::KEY_RECORD_COUNT] = $recordCount;
-            $mergeMonitor->set(MergeMonitor::KEY_RECORD_COUNT, $recordCount);
+            $json[MergeMonitor::KEY_COUNT_RECORDS] = $recordCount;
+            $mergeMonitor->set(MergeMonitor::KEY_COUNT_RECORDS, $recordCount);
 
             // Calculate required requests
             $requiredRequests = ceil($recordCount / $this->appConfig['max_inserts_per_request']);

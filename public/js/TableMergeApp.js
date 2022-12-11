@@ -21,7 +21,7 @@ class TableMergeApp {
                     messages: [],
                     perc_loaded: 0,
                     initialization_succeed: false,
-                    record_count: -1,
+                    count_records: -1,
                     requests_required: -1,
                     requests_pending: -1,
                     requests_completed: -1,
@@ -58,7 +58,7 @@ class TableMergeApp {
                             if (data.success === true) {
                                 this.initialization_succeed = true;
                                 this.messages = [...this.messages, ...data.messages];
-                                this.record_count = data.record_count;
+                                this.count_records = data.count_records;
                                 this.requests_required = data.requests_required;
                                 this.requests_pending = data.requests_pending;
                                 this.requests_completed = data.requests_completed;

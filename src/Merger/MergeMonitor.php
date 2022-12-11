@@ -36,16 +36,15 @@ class MergeMonitor
     public const KEY_MODEL = 'model';
     public const KEY_MAX_INSERTS_PER_REQUEST = 'max_inserts_per_request';
     public const KEY_INITIALIZED = 'initialized';
-    public const KEY_RECORD_COUNT = 'record_count';
     public const KEY_REQUESTS_REQUIRED = 'requests_required';
     public const KEY_REQUESTS_COMPLETED = 'requests_completed';
     public const KEY_REQUESTS_PENDING = 'requests_pending';
     public const KEY_MERGING_PROCESS_COMPLETED = 'merging_process_completed';
     public const KEY_MERGING_PROCESS_STOPPED_WITH_ERROR = 'merging_process_stopped_with_error';
+    public const KEY_COUNT_RECORDS = 'count_records';
     public const KEY_COUNT_INSERTS = 'count_inserts';
     public const KEY_COUNT_UPDATES = 'count_updates';
     public const KEY_COUNT_DELETIONS = 'count_deletions';
-
     public const KEY_MESSAGES = 'messages';
 
     private ContaoFramework $framework;
@@ -78,7 +77,7 @@ class MergeMonitor
             self::KEY_MODEL => $this->model->row(),
             self::KEY_INITIALIZED => false,
             self::KEY_MAX_INSERTS_PER_REQUEST => $this->appConfig['max_inserts_per_request'],
-            self::KEY_RECORD_COUNT => -1,
+            self::KEY_COUNT_RECORDS => -1,
             self::KEY_REQUESTS_COMPLETED => 0,
             self::KEY_REQUESTS_PENDING => -1,
             self::KEY_REQUESTS_REQUIRED => -1,
