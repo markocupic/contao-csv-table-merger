@@ -19,7 +19,7 @@ use Markocupic\ContaoCsvTableMerger\Model\CsvTableMergerModel;
 use Markocupic\ContaoCsvTableMerger\Session\Attribute\ArrayAttributeBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class MergeMonitorProvider
+class MergeMonitorFactory
 {
     private RequestStack $requestStack;
     private array $appConfig;

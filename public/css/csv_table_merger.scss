@@ -1,10 +1,11 @@
 .cctm-app {
 
-
   .cctm-app-inner {
     [v-cloak] {
       visibility: hidden;
     }
+
+    margin: 10px 15px 16px 15px;
 
     h2 {
       margin-bottom: 2rem;
@@ -18,7 +19,8 @@
       margin-bottom: 1rem;
 
       span {
-        margin-right: 2rem;
+        margin-right: 1rem;
+        line-height: 1.5;
       }
     }
 
@@ -81,7 +83,7 @@
   .cctm-progress-bar-container .cctm-progress-bar-inner {
     height: 30px;
     width: 0;
-    background-color: #5eaf4c;
+    background-color: green;
     transition: width 1.5s ease;
     line-height: 1.5;
     color: #ffffff;

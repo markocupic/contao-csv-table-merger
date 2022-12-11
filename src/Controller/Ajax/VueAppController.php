@@ -18,7 +18,7 @@ use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Security\ContaoCorePermissions;
 use Doctrine\DBAL\Exception;
 use Markocupic\ContaoCsvTableMerger\Merger\MergeMonitor;
-use Markocupic\ContaoCsvTableMerger\Merger\MergeMonitorProvider;
+use Markocupic\ContaoCsvTableMerger\Merger\MergeMonitorFactory;
 use Markocupic\ContaoCsvTableMerger\Merger\Merger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -34,15 +34,15 @@ class VueAppController extends AbstractController
     private ContaoFramework $framework;
     private Security $security;
     private Merger $merger;
-    private MergeMonitorProvider $mergeMonitorProvider;
+    private MergeMonitorFactory $mergeMonitorFactory;
     private array $appConfig;
 
-    public function __construct(ContaoFramework $framework, Security $security, Merger $merger, MergeMonitorProvider $mergeMonitorProvider, array $appConfig)
+    public function __construct(ContaoFramework $framework, Security $security, Merger $merger, MergeMonitorFactory $mergeMonitorFactory, array $appConfig)
     {
         $this->framework = $framework;
         $this->security = $security;
         $this->merger = $merger;
-        $this->mergeMonitorProvider = $mergeMonitorProvider;
+        $this->mergeMonitorFactory = $mergeMonitorFactory;
         $this->appConfig = $appConfig;
     }
 
@@ -58,7 +58,7 @@ class VueAppController extends AbstractController
     {
         $this->framework->initialize(false);
 
-        $mergeMonitor = $this->mergeMonitorProvider->getFromSessionKey($session_key);
+        $mergeMonitor = $this->mergeMonitorFactory->getFromSessionKey($session_key);
 
         // Check if backend user has access.
         $this->checkIsAllowed();
@@ -115,7 +115,7 @@ class VueAppController extends AbstractController
     {
         $this->framework->initialize(false);
 
-        $mergeMonitor = $this->mergeMonitorProvider->getFromSessionKey($session_key);
+        $mergeMonitor = $this->mergeMonitorFactory->getFromSessionKey($session_key);
 
         // Check if backend user has access.
         $this->checkIsAllowed();

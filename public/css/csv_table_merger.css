@@ -1,88 +1,77 @@
+.cctm-app .cctm-app-inner {
+  margin: 10px 15px 16px 15px;
+}
 .cctm-app .cctm-app-inner [v-cloak] {
-    visibility: hidden;
+  visibility: hidden;
 }
-
 .cctm-app .cctm-app-inner h2 {
-    margin-bottom: 2rem;
+  margin-bottom: 2rem;
 }
-
 .cctm-app .cctm-app-inner .cctm-request-info {
-    color: green;
-    display: flex;
-    flex-wrap: wrap;
-    font-size: 10px;
-    margin-bottom: 1rem;
+  color: green;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 10px;
+  margin-bottom: 1rem;
 }
-
 .cctm-app .cctm-app-inner .cctm-request-info span {
-    margin-right: 2rem;
+  margin-right: 1rem;
+  line-height: 1.5;
 }
-
 .cctm-app .cctm-app-inner .cctm-status-box {
-    padding: 1rem;
+  padding: 1rem;
 }
-
 .cctm-app .cctm-app-inner .cctm-status-box p {
-    margin: 0;
+  margin: 0;
 }
-
 .cctm-app .cctm-app-inner .cctm-status-success {
-    background-color: rgba(0, 128, 0, 0.33);
+  background-color: rgba(0, 128, 0, 0.33);
 }
-
 .cctm-app .cctm-app-inner .cctm-status-pending {
-    background-color: whitesmoke;
+  background-color: whitesmoke;
 }
-
 .cctm-app .cctm-app-inner .cctm-status-error {
-    background-color: rgba(250, 150, 150, 0.73);
+  background-color: rgba(250, 150, 150, 0.73);
 }
-
 .cctm-app .cctm-app-inner .cctm-summary-box {
-    background-color: #0a0a0a;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    height: 400px;
-    overflow-y: scroll;
+  background-color: #0a0a0a;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  overflow-y: scroll;
 }
-
 .cctm-app .cctm-app-inner .cctm-summary-box p {
-    line-height: 1.8;
-    font-size: 11px;
-    padding: 0;
-    margin: 0;
-    margin-bottom: 0.4rem;
-    background: 0 !important;
+  line-height: 1.8;
+  font-size: 11px;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 0.4rem;
+  background: 0 !important;
 }
-
 .cctm-app .cctm-app-inner .cctm-summary-box p:last-child {
-    margin-bottom: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
 }
-
 .cctm-app .cctm-app-inner .cctm-summary-box .tl_error, .cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-error {
-    color: #f88585;
+  color: #f88585;
 }
-
 .cctm-app .cctm-app-inner .cctm-summary-box .tl_info, .cctm-app .cctm-app-inner .cctm-summary-box .cctm-summary-box-item-info {
-    color: greenyellow;
+  color: greenyellow;
 }
-
 .cctm-app .cctm-progress-bar-container {
-    margin: 15px 0;
-    background-color: #fbfbfb;
+  margin: 15px 0;
+  background-color: #fbfbfb;
 }
-
 .cctm-app .cctm-progress-bar-container .cctm-progress-bar-inner {
-    height: 30px;
-    width: 0;
-    background-color: #5eaf4c;
-    transition: width 1.5s ease;
-    line-height: 1.5;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  height: 30px;
+  width: 0;
+  background-color: green;
+  transition: width 1.5s ease;
+  line-height: 1.5;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /*# sourceMappingURL=csv_table_merger.css.map */
