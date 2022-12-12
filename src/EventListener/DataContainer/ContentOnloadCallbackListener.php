@@ -14,11 +14,9 @@ declare(strict_types=1);
 
 namespace Markocupic\ContaoCsvTableMerger\EventListener\DataContainer;
 
-use Contao\CoreBundle\ServiceAnnotation\Callback;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 
-/**
- * @Callback(target="config.onload", table="tl_csv_table_merger")
- */
+#[AsCallback(table: 'tl_csv_table_merger', target: 'config.onload', priority: 100)]
 class ContentOnloadCallbackListener
 {
     public function __invoke(): void

@@ -14,17 +14,12 @@ declare(strict_types=1);
 
 namespace Markocupic\ContaoCsvTableMerger\EventListener\ContaoHook\BeforeUpdate;
 
-use Contao\CoreBundle\ServiceAnnotation\Hook;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Markocupic\ContaoCsvTableMerger\DataRecord\DataRecord;
 use Markocupic\ContaoCsvTableMerger\EventListener\ContaoHook\AbstractContaoHook;
 use yidas\googleMaps\Client;
 
-//use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
-
-/**
- * @Hook(GeocodingListener::HOOK, priority=GeocodingListener::PRIORITY)
- */
-//#[AsHook(GeocodingListener::HOOK, priority: GeocodingListener::PRIORITY)]
+#[AsHook(GeocodingListener::HOOK, priority: GeocodingListener::PRIORITY)]
 class GeocodingListener extends AbstractContaoHook
 {
     public const HOOK = 'csvTableMergerBeforeUpdate';

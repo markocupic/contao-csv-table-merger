@@ -14,18 +14,13 @@ declare(strict_types=1);
 
 namespace Markocupic\ContaoCsvTableMerger\EventListener\ContaoHook\BeforeInsert;
 
-use Contao\CoreBundle\ServiceAnnotation\Hook;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Contao\Database;
 use Markocupic\ContaoCsvTableMerger\DataRecord\DataRecord;
 use Markocupic\ContaoCsvTableMerger\EventListener\ContaoHook\AbstractContaoHook;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
-//use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
-
-/**
- * @Hook(BeforeInsertListener::HOOK, priority=BeforeInsertListener::PRIORITY)
- */
-//#[AsHook(BeforeInsertListener::HOOK, priority: BeforeInsertListener::PRIORITY)]
+#[AsHook(BeforeInsertListener::HOOK, priority: BeforeInsertListener::PRIORITY)]
 class BeforeInsertListener extends AbstractContaoHook
 {
     public const HOOK = 'csvTableMergerBeforeInsert';

@@ -15,9 +15,8 @@ declare(strict_types=1);
 namespace Markocupic\ContaoCsvTableMerger\DataContainer;
 
 use Contao\Controller;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\CoreBundle\Framework\ContaoFramework;
-use Contao\CoreBundle\ServiceAnnotation\Callback;
-//use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -34,11 +33,11 @@ class CsvTableMerger
     }
 
     /**
-     * @Callback(table="tl_csv_table_merger", target="fields.importTable.options")
-     *
      * @throws Exception
+     *
+     * @return array
      */
-    //#[AsCallback(table: 'tl_csv_table_merger', target: 'fields.importTable.options', priority: 100)]
+    #[AsCallback(table: 'tl_csv_table_merger', target: 'fields.importTable.options', priority: 100)]
     public function optionsCallbackImportTable(): array
     {
         $schemaManager = $this->connection->createSchemaManager();
@@ -47,15 +46,15 @@ class CsvTableMerger
     }
 
     /**
-     * @Callback(table="tl_csv_table_merger", target="fields.allowedFields.options")
-     * @Callback(table="tl_csv_table_merger", target="fields.identifier.options")
-     * @Callback(table="tl_csv_table_merger", target="fields.skipValidationFields.options")
+     * @param DataContainer $dc
      *
      * @throws Exception
+     *
+     * @return array
      */
-    //#[AsCallback(table: 'tl_csv_table_merger', target: 'fields.allowedFields.options', priority: 100)]
-    //#[AsCallback(table: 'tl_csv_table_merger', target: 'fields.identifier.options', priority: 100)]
-    //#[AsCallback(table: 'tl_csv_table_merger', target: 'fields.skipValidationFields.options', priority: 100)]
+    #[AsCallback(table: 'tl_csv_table_merger', target: 'fields.allowedFields.options', priority: 100)]
+    #[AsCallback(table: 'tl_csv_table_merger', target: 'fields.identifier.options', priority: 100)]
+    #[AsCallback(table: 'tl_csv_table_merger', target: 'fields.skipValidationFields.options', priority: 100)]
     public function optionsCallbackGetTableColumns(DataContainer $dc): array
     {
         $controllerAdapter = $this->framework->getAdapter(Controller::class);

@@ -34,11 +34,11 @@ $GLOBALS['TL_LANG']['tl_csv_table_merger']['appAction'] = ["Textdatei mit Tabell
  */
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['title'] = ["Titel", "Bitte geben Sie den Titel ein."];
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['importTable'] = ["Zieltabelle", "Bitte wählen Sie die Zieltabelle aus."];
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['identifier'] = ["Datensatz-Erkennungsfeld", "Bitte wählen Sie das Feld für die Datensatzerkennung aus."];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['identifier'] = ["Datensatz-Erkennungsfeld (identifier)", "Bitte wählen Sie das Feld für die Datensatzerkennung aus."];
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['allowedFields'] = ["Erlaubte Felder", "Bitte wählen Sie die Felder aus, die überschrieben werden dürfen."];
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['delimiter'] = ["Feldtrennzeichen", "Bitte geben Sie das Feld-Trennzeichen ein. Üblicherweise ein ;"];
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['enclosure'] = ["Feldbegrenzerzeichen", "Bitte geben Sie das Feldbegrenzerzeichen ein. Üblicherweise ein \""];
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['arrayDelimiter'] = ["Array-Trennzeichen", "Bitte geben Sie das Array-Trennzeichen ein. Üblicherweise ||"];
-$GLOBALS['TL_LANG']['tl_csv_table_merger']['skipValidationFields'] = ["Eingabeprüfung überspringen", "Bitte wählen Sie die Felder aus, wo die Eingabeprüfung übersprungen werden soll."];
+$GLOBALS['TL_LANG']['tl_csv_table_merger']['skipValidationFields'] = ["Eingabeprüfung für diese Felder überspringen", "Bitte wählen Sie die Felder aus, für die die Eingabeprüfung übersprungen werden soll."];
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['fileSRC'] = ["CSV Textdatei", "Bitte wählen Sie die Textdatei aus."];
 $GLOBALS['TL_LANG']['tl_csv_table_merger']['deleteNonExistentRecords'] = ["Nicht mehr existierende Datensätze löschen", "Entscheiden Sie, ob in der Textdatei nicht mehr vorhandene Datensätze auch aus der Zieltabelle gelöscht werden sollen."];
