@@ -2,7 +2,6 @@ class TableMergeApp {
     constructor(vueElement, opt) {
 
         const defaults = {
-            'delimiters': ['[[', ']]'],
             'session_key': null,
             'routes': {
                 'initialize': null,
@@ -62,8 +61,10 @@ class TableMergeApp {
                                 this.requests_required = data.requests_required;
                                 this.requests_pending = data.requests_pending;
                                 this.requests_completed = data.requests_completed;
-
                             } else {
+                                if (typeof data.messages !== 'undefined' && data.messages) {
+                                    this.messages = [...this.messages, ...data.messages];
+                                }
                                 this.initialization_succeed = false;
                                 this.merging_process_stopped_with_error = true;
                             }
@@ -94,10 +95,21 @@ class TableMergeApp {
                                 }
                             } else {
                                 if (data) {
-                                    this.messages = [...this.messages, ...data.messages];
-                                    this.count_inserts = data.count_inserts;
-                                    this.count_updates = data.count_updates;
-                                    this.count_deletions = data.count_deletions;
+                                    if (typeof data.messages !== 'undefined' && data.messages) {
+                                        this.messages = [...this.messages, ...data.messages];
+                                    }
+
+                                    if (typeof data.count_inserts !== 'undefined' && data.count_inserts) {
+                                        this.count_inserts = data.count_inserts;
+                                    }
+
+                                    if (typeof data.count_updates !== 'undefined' && data.count_updates) {
+                                        this.count_updates = data.count_updates;
+                                    }
+
+                                    if (typeof data.count_deletions !== 'undefined' && data.count_deletions) {
+                                        this.count_deletions = data.count_deletions;
+                                    }
                                 }
                                 this.updateProgressBar();
                                 this.merging_process_stopped_with_error = true;
