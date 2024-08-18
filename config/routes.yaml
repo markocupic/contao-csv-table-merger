@@ -1,4 +1,0 @@
-# config/routes.yaml
-markocupic_contao_csv_table_merger.controller:
-    resource: ../src/Controller
-    type: attribute
